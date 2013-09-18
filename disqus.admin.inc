@@ -157,6 +157,31 @@ function disqus_admin_settings() {
       ),
     ),
   );
-
+  // Make sure the validation is called to handle the custom sso logo.
+  $form['#submit'][] = 'disqus_admin_settings_submit';
   return system_settings_form($form);
+}
+
+/**
+ * Form callback; Make sure we process the sso logo and set it to a permanent status.
+ */
+function disqus_admin_settings_submit($form, &$form_state) {
+  $old_logo = variable_get('disqus_logo', '');
+  $new_logo = (isset($form_state['values']['disqus_logo'])) ? $form_state['values']['disqus_logo'] : '';
+  // Ignore if the file hasn't changed.
+  if ($new_logo != $old_logo) {
+    // Remove the old file and usage if previously set.
+    if ($old_logo != '') {
+      $file = file_load($old_logo);
+      file_usage_delete($file, 'disqus', 'disqus');
+      file_delete($file);
+    }
+    // Update the new file and usage.
+    if ($new_logo != '') {
+      $file = file_load($new_logo);
+      file_usage_add($file, 'disqus', 'disqus', 0);
+      $file->status = FILE_STATUS_PERMANENT;
+      file_save($file);
+    }
+  }
 }
