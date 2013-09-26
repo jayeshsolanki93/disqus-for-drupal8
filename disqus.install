@@ -68,7 +68,6 @@ function disqus_uninstall() {
     'disqus_top_commenters_items',
     'disqus_top_commenters_showavatars',
     'disqus_use_site_logo',
-    'disqus_userapikey',
     'disqus_weight',
   );
   foreach ($variables as $variable) {
@@ -90,4 +89,12 @@ function disqus_update_7001() {
   if (!db_table_exists('disqus')) {
     drupal_install_schema('disqus');
   }
+}
+
+
+/**
+ * Remove deprecated variable.
+ */
+function disqus_update_7002() {
+  variable_del('disqus_userapikey');
 }
