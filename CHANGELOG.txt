@@ -2,6 +2,7 @@ CHANGELOG for Disqus for Drupal 7
 
 Disqus 7.x-1.x-dev
 =================================
+- #1783636 by jeroen12345: Added Implement hook_variable_info() in order to allow variable disqus_domain() (shortname) to be translated.
 - #2083329 by slashrsm, thedavidmeister | dianikol: The link to get api key is lead to a 404 page.
 - #2021905 by tkngdwn: Record file usage for SSO logo.
 - #2040057 by mandar.harkare, RobLoach | steven.wichers: Hook_uninstall() removes variables not belonging to Disqus.
