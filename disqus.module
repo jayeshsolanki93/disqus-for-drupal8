@@ -144,6 +144,7 @@ function disqus_element_post_render($children, &$element) {
         $data['avatar'] = file_create_url($data['avatar']);
       }
     }
+    drupal_alter('disqus_user_data', $data);
 
     // Give Disqus information about the site.
     $disqus['sso'] = array(
