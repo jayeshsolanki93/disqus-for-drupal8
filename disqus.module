@@ -551,6 +551,8 @@ function disqus_block_save($delta = '', $edit = array()) {
  * Implements hook_block_view().
  */
 function disqus_block_view($delta = '') {
+  global $user;
+
   $options = array(
     'num_items' => variable_get($delta . '_items', 5),
     'avatars' => variable_get($delta . '_showavatars', TRUE) ? array('avatar_size' => variable_get($delta . '_avatarsize', 32)) : array('hide_avatars=1'),
@@ -598,6 +600,7 @@ function disqus_block_view($delta = '') {
                     'disqus_comments',
                     'node',
                     (int) $object->nid,
+                    variable_get('disqus_sso', FALSE) ? 'sso_' . $user->uid : 'no_sso',
                   ),
                 ),
               );
@@ -618,6 +621,7 @@ function disqus_block_view($delta = '') {
                     'disqus_comments',
                     'user',
                     (int) $object->uid,
+                    variable_get('disqus_sso', FALSE) ? 'sso_' . $user->uid : 'no_sso',
                   ),
                 ),
               );

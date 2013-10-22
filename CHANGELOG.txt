@@ -2,6 +2,7 @@ CHANGELOG for Disqus for Drupal 7
 
 Disqus 7.x-1.x-dev
 =================================
+- #2111397 by slashrsm | joco: Cache disqus_comments block per-user if using SSO.
 - #2109505 by tkngdwn: Added Official Disqus PHP API Support.
 - #2114647 by Grayside: Added Decompose disqus_element_post_render() into more manageable API functions.
 - #1537548 by Owen Barton, Grayside | kevinwalsh: Added Altering user data passed to Disqus SSO.
