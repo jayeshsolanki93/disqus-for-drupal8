@@ -6,6 +6,21 @@
  */
 
 /**
+ * API No action on node delete.
+ */
+define('DISQUS_API_NO_ACTION', 0);
+
+/**
+ * API Close on node delete.
+ */
+define('DISQUS_API_CLOSE', 1);
+
+/**
+ * API Remove on node delete.
+ */
+define('DISQUS_API_REMOVE', 2);
+
+/**
  * Implements hook_help().
  */
 function disqus_help($path, $arg) {
@@ -257,6 +272,42 @@ function disqus_node_view($node, $view_mode) {
  */
 function disqus_node_delete($node) {
   db_delete('disqus')->condition('nid', $node->nid)->execute();
+
+  // Close/remove the thread on disqus if required.
+  $action = variable_get('disqus_api_delete', DISQUS_API_NO_ACTION);
+  if ($action != DISQUS_API_NO_ACTION) {
+    $disqus = disqus_api();
+    if ($disqus) {
+      try {
+        // Load the thread data from disqus. Passing thread is required to allow the thread:ident call to work correctly. There is a pull request to fix this issue.
+        $thread = $disqus->threads->details(array('forum' => $node->disqus['domain'], 'thread:ident' => $node->disqus['identifier'], 'thread' => '1', 'version' => '3.0'));
+      }
+      catch (Exception $exception) {
+        drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
+        watchdog('disqus', 'Error loading thread details for node @nid. Check your API keys.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+      }
+      if (isset($thread->id)) {
+        if ($action == DISQUS_API_CLOSE) {
+          try {
+            $disqus->threads->close(array('access_token' => variable_get('disqus_useraccesstoken', ''), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'version' => '3.0'));
+          }
+          catch (Exception $exception) {
+            drupal_set_message(t('There was an error closing the thread on Disqus.'), 'error');
+            watchdog('disqus', 'Error closing thread for node @nid. Check your user access token.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+          }
+        }
+        if ($action == DISQUS_API_REMOVE) {
+          try {
+            $disqus->threads->remove(array('access_token' => variable_get('disqus_useraccesstoken', ''), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'version' => '3.0'));
+          }
+          catch (Exception $exception) {
+            drupal_set_message(t('There was an error removing the thread on Disqus.'), 'error');
+            watchdog('disqus', 'Error removing thread for node @nid. Check your user access token.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -277,6 +328,31 @@ function disqus_node_insert($node) {
  * Implements hook_node_update().
  */
 function disqus_node_update($node) {
+  // Update the thread information on disqus if required.
+  if (variable_get('disqus_api_update', FALSE) && ($node->disqus['title'] != $node->original->disqus['title'] || $node->disqus['url'] != $node->original->disqus['url'])) {
+    $disqus = disqus_api();
+    if ($disqus) {
+      try {
+        // Load the thread data from disqus. Passing thread is required to allow the thread:ident call to work correctly. There is a pull request to fix this issue.
+        $thread = $disqus->threads->details(array('forum' => $node->disqus['domain'], 'thread:ident' => $node->disqus['identifier'], 'thread' => '1', 'version' => '3.0'));
+      }
+      catch (Exception $exception) {
+        drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
+        watchdog('disqus', 'Error loading thread details for node @nid. Check your API keys.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+      }
+      if (isset($thread->id)) {
+        try {
+          $disqus->threads->update(array('access_token' => variable_get('disqus_useraccesstoken', ''), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'title' => $node->disqus['title'], 'url' => $node->disqus['url'], 'version' => '3.0'));
+        }
+        catch (Exception $exception) {
+          drupal_set_message(t('There was an error updating the thread details on Disqus.'), 'error');
+          watchdog('disqus', 'Error updating thread details for node @nid. Check your user access token.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        }
+      }
+    }
+  }
+
+  // Finish the update process.
   if (isset($node->disqus_status) && isset($node->disqus['status']) && $node->disqus_status != $node->disqus['status']) {
     if ($node->disqus_status) {
       disqus_node_delete($node);
@@ -696,6 +772,47 @@ function theme_disqus_noscript($variables = array()) {
 }
 
 /**
+ * Implements hook_libraries_info().
+ */
+function disqus_libraries_info() {
+  $libraries['disqusapi'] = array(
+    'name' => 'Disqus PHP API',
+    'vendor url' => 'https://github.com/disqus/disqus-php',
+    'download url' => 'https://github.com/disqus/disqus-php',
+    'version arguments' => array(
+      'file' => 'disqusapi.php',
+      'pattern' => '@version\s+([0-9a-zA-Z\.-]+)@',
+      'lines' => 20,
+    ),
+    'files' => array(
+      'php' => array('disqusapi.php'),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Creates an instance of the Disqus PHP API.
+ *
+ * @return
+ *   The instance of the Disqus API.
+ */
+function disqus_api() {
+  if (module_exists('libraries') && ($library = libraries_load('disqusapi')) && !empty($library['loaded'])) {
+    try {
+      $disqus = new DisqusAPI(variable_get('disqus_secretkey', ''));
+    }
+    catch (Exception $exception) {
+      drupal_set_message(t('There was an error loading the Disqus PHP API. Please check your API keys and try again.'), 'error');
+      watchdog('disqus', 'Error loading the Disqus PHP API. Check your API keys.', array(), WATCHDOG_ERROR, 'admin/config/services/disqus');
+      return FALSE;
+    }
+    return $disqus;
+  }
+  return FALSE;
+}
+
+/**
  * Creates an instance of the Disqus PHP API.
  *
  * @param $user_api_key
@@ -768,6 +885,12 @@ function disqus_variable_info($options) {
         'type' => 'string',
         '#title' => t('Testing'),
         '#description' => t('When enabled, uses the <a href="http://docs.disqus.com/help/2/">disqus_developer</a> flag to tell Disqus that you are in a testing environment. Threads will not display on the public community page with this set.'),
+        'default' => '',
+        'group' => 'disqus'
+    );
+    $variable['disqus_useraccesstoken'] = array(
+        'type' => 'string',
+        '#title' => t('User Access Token'),
         'default' => '',
         'group' => 'disqus'
     );
