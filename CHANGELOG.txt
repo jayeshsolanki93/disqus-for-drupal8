@@ -1,6 +1,6 @@
 CHANGELOG for Disqus for Drupal 7
 
-Disqus 7.x-1.x-dev
+Disqus 7.x-1.10
 =================================
 - #1783636 by nunoveloso: Fix typos in hook_variable_info().
 - #2111397 by slashrsm | joco: Cache disqus_comments block per-user if using SSO.
