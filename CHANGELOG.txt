@@ -2,6 +2,7 @@ CHANGELOG for Disqus for Drupal 7
 
 Disqus 7.x-1.x-dev
 =================================
+- #2169911 by _wdm_: Adding node edit comment info.
 - #2144035 by slashrsm | destinationsound: A "Configure block" link shows to anonymous users.
 
 Disqus 7.x-1.10

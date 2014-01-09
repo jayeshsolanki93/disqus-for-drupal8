@@ -728,6 +728,9 @@ function disqus_form_alter(&$form, $form_state, $form_id) {
           '#collapsed' => TRUE,
           '#group' => 'additional_settings',
           '#weight' => 30,
+          '#attached' => array(
+            'js' => array(drupal_get_path('module', 'disqus') . '/disqus-node-form.js'),
+          ),
         );
       }
       else {
@@ -736,6 +739,8 @@ function disqus_form_alter(&$form, $form_state, $form_id) {
           $form['comment_settings']['comment']['#access'] = $form['comment_settings']['#access'];
           // But reveal parent comment settings fieldset if user has toggle permission
           $form['comment_settings']['#access'] = user_access('toggle disqus comments');
+          // Add the Javascript for tab text.
+          $form['comment_settings']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus-node-form.js';
         }
       }
       // Add the Disqus settings into the comment settings fieldset for users with toggle permission.
