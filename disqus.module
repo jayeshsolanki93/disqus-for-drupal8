@@ -579,7 +579,7 @@ function disqus_block_view($delta = '') {
 
   $options = array(
     'num_items' => variable_get($delta . '_items', 5),
-    'avatars' => variable_get($delta . '_showavatars', TRUE) ? array('avatar_size' => variable_get($delta . '_avatarsize', 32)) : array('hide_avatars=1'),
+    'avatars' => variable_get($delta . '_showavatars', TRUE) ? array('avatar_size' => variable_get($delta . '_avatarsize', 32)) : array('hide_avatars'=>1),
     'color' => variable_get($delta . '_colortheme', 'blue'),
     'default_tab' => variable_get($delta . '_defaulttabview', 'people'),
     'excerpt_length' => variable_get($delta . '_excerpt_length', '200'),

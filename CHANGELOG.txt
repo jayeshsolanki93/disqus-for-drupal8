@@ -2,6 +2,7 @@ CHANGELOG for Disqus for Drupal 7
 
 Disqus 7.x-1.x-dev
 =================================
+- #2142607 by Neptun | Andrew Perriman: Cannot disable avatars in recent comments block.
 - #1579492 by zuuperman: Expose disqus as a display field with hook_field_extra_fields().
 - #2169911 by _wdm_: Adding node edit comment info.
 - #2144035 by slashrsm | destinationsound: A "Configure block" link shows to anonymous users.
