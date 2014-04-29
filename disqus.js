@@ -15,6 +15,8 @@ var disqus_config;
 
 (function ($) {
 
+"use strict";
+
 /**
  * Drupal Disqus behavior.
  */
