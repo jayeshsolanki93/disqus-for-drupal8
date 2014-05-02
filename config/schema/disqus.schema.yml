@@ -1,0 +1,58 @@
+# Schema for the configuration files of the disqus module.
+
+disqus.settings:
+  type: mapping
+  label: 'Disqus settings'
+  mapping:
+    disqus_domain :
+      type: string
+      label: 'Shortname'
+    visibility:
+      type: mapping
+      label: 'Visibility'
+      mapping:
+        disqus_nodetypes:
+          type: array
+          label: 'Node Types'
+        disqus_location:
+          type: string
+          label: 'Location'
+        disqus_weight:
+          type: string
+          label: 'Weight'
+    behavior:
+      type: mapping
+      label: "Behavior"
+      mapping:
+        disqus_localization:
+          type: boolean
+          label: 'Localization support'
+        disqus_inherit_login:
+          type: boolean
+          label: 'Inherit User Credentials'
+        disqus_developer:
+          type: boolean
+          label: 'Testing'
+    advanced:
+      type: mapping
+      label: 'Advanced'
+      mapping:
+        disqus_publickey:
+          type: string
+          label: 'Public Key'
+        disqus_secretkey:
+          type: string
+          label: 'Secret Key'
+        sso:
+          type: mapping
+          label: 'Single Sign-On'
+          mapping:
+            disqus_sso:
+              type: boolean
+              label: 'Use Single Sign-On'
+            disqus_use_site_logo:
+              type: boolean
+              label: 'Use Site Logo'
+            disqus_logo:
+              type: uri
+              label: 'Custom Logo'

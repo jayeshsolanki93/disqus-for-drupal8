@@ -1,8 +1,9 @@
 name: 'Disqus'
-type: 'module'
+type: module
 description: 'Uses the Disqus web service to enhance comments.'
+version : VERSION
 core: 8.x
-configure: admin/config/services/disqus
+configure: disqus.settings
 dependencies:
   - node
   - user

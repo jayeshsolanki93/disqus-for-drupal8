@@ -62,25 +62,6 @@ function disqus_permission() {
 }
 
 /**
- * Implements hook_menu().
- */
-function disqus_menu() {
-  $items = array();
-  $items['admin/config/services/disqus'] = array(
-    'route_name' => 'disqus.admin',
-    'title' => 'Disqus',
-    'description' => 'Provides configuration options for the Disqus comment system.',
-  );
-  $items['disqus/closewindow'] = array(
-    'route_name' => 'disqus.close_window',
-    'title' => 'Please wait',
-    'description' => 'Once the user logs in through the Disqus login workflow, they are redirected here to automatically close the popup window.',
-    'type' => MENU_CALLBACK,
-  );
-  return $items;
-}
-
-/**
  * Implements hook_element_info().
  */
 function disqus_element_info() {

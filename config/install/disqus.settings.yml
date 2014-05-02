@@ -1,0 +1,16 @@
+disqus_domain: ''
+visibility:
+  disqus_nodetypes: { }
+  disqus_location: 'content_area'
+  disqus_weight: '50'
+behavior:
+  disqus_localization: false
+  disqus_inherit_login: false
+  disqus_developer: false
+advanced:
+  disqus_publickey: ''
+  disqus_secretkey: ''
+  sso:
+    disqus_sso: false
+    disqus_use_site_logo: false
+    disqus_logo: ''

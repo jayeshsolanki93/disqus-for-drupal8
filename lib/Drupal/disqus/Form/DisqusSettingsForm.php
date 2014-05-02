@@ -17,7 +17,7 @@ class DisqusSettingsForm extends ConfigFormBase {
    * {@inheritdoc}
    */
   public function buildForm(array $form, array &$form_state) {
-    $disqus_config = $this->configFactory->get('disqus.settings');
+    $disqus_config = $this->config('disqus.settings');
 
     $form['disqus_domain'] = array(
       '#type' => 'textfield',
@@ -35,7 +35,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#weight' => 50,
     );
     // Visibility settings.
-    $form['visibility'] = array(
+    $form['settings']['visibility'] = array(
       '#type' => 'details',
       '#title' => t('Visibility'),
       '#group' => 'settings',
@@ -45,14 +45,15 @@ class DisqusSettingsForm extends ConfigFormBase {
     foreach ($types as $type) {
       $options[$type->type] = $type->name;
     }
-    $form['visibility']['disqus_nodetypes'] = array(
+    $node_types = $disqus_config->get('visibility.disqus_nodetypes');
+    $form['settings']['visibility']['disqus_nodetypes'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Node Types'),
       '#description' => t('Apply comments to only the following node types.'),
-      '#default_value' => $disqus_config->get('visibility.disqus_nodetypes'),
+      '#default_value' => !empty($node_types) ? $node_types : array(),
       '#options' => $options,
     );
-    $form['visibility']['disqus_location'] = array(
+    $form['settings']['visibility']['disqus_location'] = array(
       '#type' => 'select',
       '#title' => t('Location'),
       '#description' => t('Display the Disqus comments in the given location. When "Block" is selected, the comments will appear in the <a href="@disquscomments">Disqus Comments block</a>.', array('@disquscomments' => url('admin/structure/block'))),
@@ -62,7 +63,7 @@ class DisqusSettingsForm extends ConfigFormBase {
         'block' => t('Block'),
       ),
     );
-    $form['visibility']['disqus_weight'] = array(
+    $form['settings']['visibility']['disqus_weight'] = array(
       '#type' => 'select',
       '#title' => t('Weight'),
       '#description' => t('When the comments are displayed in the content area, you can change the position at which they will be shown.'),
@@ -75,31 +76,31 @@ class DisqusSettingsForm extends ConfigFormBase {
       ),
     );
     // Behavior settings.
-    $form['behavior'] = array(
+    $form['settings']['behavior'] = array(
       '#type' => 'details',
       '#title' => t('Behavior'),
       '#group' => 'settings',
     );
-    $form['behavior']['disqus_localization'] = array(
+    $form['settings']['behavior']['disqus_localization'] = array(
       '#type' => 'checkbox',
       '#title' => t('Localization support'),
       '#description' => t("When enabled, overrides the language set by Disqus with the language provided by the site."),
       '#default_value' => $disqus_config->get('behavior.disqus_localization'),
     );
-    $form['behavior']['disqus_inherit_login'] = array(
+    $form['settings']['behavior']['disqus_inherit_login'] = array(
       '#type' => 'checkbox',
       '#title' => t('Inherit User Credentials'),
       '#description' => t("When enabled and a user is logged in, the Disqus 'Post as Guest' login form will be pre-filled with the user's name and email address."),
       '#default_value' => $disqus_config->get('behavior.disqus_inherit_login'),
     );
-    $form['behavior']['disqus_developer'] = array(
+    $form['settings']['behavior']['disqus_developer'] = array(
       '#type' => 'checkbox',
       '#title' => t('Testing'),
       '#description' => t('When enabled, uses the <a href="http://docs.disqus.com/help/2/">disqus_developer</a> flag to tell Disqus that you are in a testing environment. Threads will not display on the public community page with this set.'),
       '#default_value' => $disqus_config->get('behavior.disqus_developer'),
     );
     // Advanced settings.
-    $form['advanced'] = array(
+    $form['settings']['advanced'] = array(
       '#type' => 'details',
       '#title' => t('Advanced'),
       '#group' => 'settings',
@@ -108,18 +109,17 @@ class DisqusSettingsForm extends ConfigFormBase {
         '@addons' => 'http://disqus.com/addons/',
       )),
     );
-    $form['advanced']['disqus_publickey'] = array(
+    $form['settings']['advanced']['disqus_publickey'] = array(
       '#type' => 'textfield',
       '#title' => t('Public Key'),
       '#default_value' => $disqus_config->get('advanced.disqus_publickey'),
     );
-    $form['advanced']['disqus_secretkey'] = array(
+    $form['settings']['advanced']['disqus_secretkey'] = array(
       '#type' => 'textfield',
       '#title' => t('Secret Key'),
       '#default_value' => $disqus_config->get('advanced.disqus_secretkey'),
     );
-
-    $form['advanced']['sso'] = array(
+    $form['settings']['advanced']['sso'] = array(
       '#weight' => 5,
       '#type' => 'fieldset',
       '#title' => t('Single Sign-on'),
@@ -132,15 +132,15 @@ class DisqusSettingsForm extends ConfigFormBase {
         ),
       ),
     );
-    $form['advanced']['sso']['disqus_sso'] = array(
+    $form['settings']['advanced']['sso']['disqus_sso'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use Single Sign-On'),
       '#description' => t('Provide <a href="@sso">Single Sign-On</a> access to your site.', array(
         '@sso' => 'http://disqus.com/api/sso/',
       )),
-      '#default_value' => $disqus_config->get('disqus_sso'),
+      '#default_value' => $disqus_config->get('advanced.sso.disqus_sso'),
     );
-    $form['advanced']['sso']['disqus_use_site_logo'] = array(
+    $form['settings']['advanced']['sso']['disqus_use_site_logo'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use Site Logo'),
       '#description' => t('Pass the site logo to Disqus for use as SSO login button.'),
@@ -151,7 +151,7 @@ class DisqusSettingsForm extends ConfigFormBase {
         ),
       ),
     );
-    $form['advanced']['sso']['disqus_logo'] = array(
+    $form['settings']['advanced']['sso']['disqus_logo'] = array(
       '#type' => 'managed_file',
       '#title' => t('Custom Logo'),
       '#upload_location' => 'public://images',
@@ -165,18 +165,17 @@ class DisqusSettingsForm extends ConfigFormBase {
         ),
       ),
     );
-
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => $this->t('Add'),
     );
-
     return $form;
   }
 
   public function submitForm(array &$form, array &$form_state) {
-    $this->configFactory->get('disqus.settings')
+    $config = $this->config('disqus.settings');
+    $config
       ->set('disqus_domain', $form_state['values']['disqus_domain'])
       ->set('visibility.disqus_nodetypes', $form_state['values']['disqus_nodetypes'])
       ->set('visibility.disqus_location', $form_state['values']['disqus_location'])
