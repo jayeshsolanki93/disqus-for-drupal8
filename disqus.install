@@ -41,7 +41,7 @@ function disqus_schema() {
 /**
  * Implements hook_uninstall().
  */
-function disqus_uninstall() {
+/*function disqus_uninstall() {
   $variables = array(
     'disqus_combination_widget_colortheme',
     'disqus_combination_widget_defaulttabview',
@@ -73,7 +73,7 @@ function disqus_uninstall() {
   foreach ($variables as $variable) {
     variable_del($variable);
   }
-}
+}*/
 
 /**
  * Updates from Drupal 6 to 7.

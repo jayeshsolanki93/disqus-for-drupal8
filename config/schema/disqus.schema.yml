@@ -2,9 +2,9 @@
 
 disqus.settings:
   type: mapping
-  label: 'Disqus settings'
+  label: 'Disqus Settings'
   mapping:
-    disqus_domain :
+    disqus_domain:
       type: string
       label: 'Shortname'
     visibility:
