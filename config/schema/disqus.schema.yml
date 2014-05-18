@@ -37,6 +37,9 @@ disqus.settings:
       type: mapping
       label: 'Advanced'
       mapping:
+        disqus_useraccesstoken:
+          type: string
+          label: 'User Access Token'
         disqus_publickey:
           type: string
           label: 'Public Key'

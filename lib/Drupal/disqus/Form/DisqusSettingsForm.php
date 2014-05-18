@@ -124,6 +124,11 @@ class DisqusSettingsForm extends ConfigFormBase {
         '@addons' => 'http://disqus.com/addons/',
       )),
     );
+    $form['advanced']['disqus_useraccesstoken'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User Access Token'),
+    '#default_value' => $disqus_config->get('advanced.disqus_useraccesstoken'),
+    );
     $form['advanced']['disqus_publickey'] = array(
       '#type' => 'textfield',
       '#title' => t('Public Key'),
@@ -201,6 +206,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('behavior.disqus_localization', $form_state['values']['disqus_localization'])
       ->set('behavior.disqus_inherit_login', $form_state['values']['disqus_inherit_login'])
       ->set('behavior.disqus_developer', $form_state['values']['disqus_developer'])
+      ->set('advanced.disqus_useraccesstoken', $form_state['values']['disqus_useraccesstoken'])
       ->set('advanced.disqus_publickey', $form_state['values']['disqus_publickey'])
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
       ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
