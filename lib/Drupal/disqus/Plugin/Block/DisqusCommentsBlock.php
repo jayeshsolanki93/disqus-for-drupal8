@@ -53,11 +53,11 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
     $disqus_config = \Drupal::config('disqus.settings');
 
     if ($disqus_config->get('visibility.disqus_location') === 'block' && \Drupal::currentUser()->hasPermission('view disqus comments')) {
-      if ($object = menu_get_object()) {
+      if ($object = \Drupal::request()->attributes->get('node')) {
         return $this->buildForNodeEntity($object);
       }
 
-      if ($object = menu_get_object('user')) {
+      if ($object = \Drupal::request()->attributes->get('user')) {
         return  $this->buildForUserEntity($object);
       }
     }
@@ -73,11 +73,6 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
           'disqus' => array(
             '#type' => 'disqus',
             '#disqus' => $object->disqus,
-            '#cache' => array(
-              'bin' => 'block',
-              'keys' => array('disqus', 'disqus_comments', 'node', $object->id()),
-              'tags' => array('content' => TRUE),
-            ),
           ),
         );
       }
@@ -92,10 +87,6 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
         'disqus' => array(
           '#type' => 'disqus',
           '#disqus' => $object->disqus,
-          '#cache' => array(
-            'bin' => 'block',
-            'keys' => array('disqus', 'disqus_comments', 'user', $object->id()),
-          ),
         ),
       );
     }

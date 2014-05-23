@@ -139,6 +139,46 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#title' => t('Secret Key'),
       '#default_value' => $disqus_config->get('advanced.disqus_secretkey'),
     );
+  if (!module_exists('libraries') || (module_exists('libraries') && ($library = libraries_detect('disqusapi')) && empty($library['installed']))) {
+    $form['advanced']['api'] = array(
+      '#weight' => 4,
+      '#type' => 'fieldset',
+      '#title' => t('Disqus API Settings'),
+      '#description' => t('These setting pertain to the official Disqus PHP API. You will need to install the <a href="@libraries">libraries module</a> and upload the <a href="@disqusapi">api files</a> to /sites/all/libraries/disqusapi to enable api functionality.', array(
+        '@libraries' => 'http://drupal.org/project/libraries',
+        '@disqusapi' => 'https://github.com/disqus/disqus-php',
+      )),
+      '#collapsible' => FALSE,
+      '#collapsed' => FALSE,
+    );
+    $form['advanced']['api']['disqus_api_update'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Update Threads'),
+      '#description' => t('Update node titles and links via the disqus api when saving. (Requires your user access token.)'),
+      '#default_value' => $disqus_config->get('advanced.api.disqus_api_update'),
+      '#states' => array(
+        'enabled' => array(
+          'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
+        ),
+      ),
+    );
+    $form['advanced']['api']['disqus_api_delete'] = array(
+      '#type' => 'select',
+      '#title' => t('Close/Remove Threads'),
+      '#description' => t('Action to take when deleting a node. (Requires your user access token.)'),
+      '#default_value' => $disqus_config->get('advanced.api.disqus_api_delete'),
+      '#options' => array(
+        DISQUS_API_NO_ACTION => t('No Action'),
+        DISQUS_API_CLOSE => t('Close Thread'),
+        DISQUS_API_REMOVE => t('Remove Thread'),
+      ),
+      '#states' => array(
+        'enabled' => array(
+          'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
+        ),
+      ),
+    );
+  }
     $form['advanced']['sso'] = array(
       '#weight' => 5,
       '#type' => 'fieldset',
@@ -209,6 +249,8 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('advanced.disqus_useraccesstoken', $form_state['values']['disqus_useraccesstoken'])
       ->set('advanced.disqus_publickey', $form_state['values']['disqus_publickey'])
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
+      ->set('advanced.api.disqus_api_update', $form_state['values']['disqus_api_update'])
+      ->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])
       ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
       ->set('advanced.sso.disqus_use_site_logo', $form_state['values']['disqus_use_site_logo'])
       ->set('advanced.sso.disqus_logo', $form_state['values']['disqus_logo'])

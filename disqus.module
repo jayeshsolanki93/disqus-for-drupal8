@@ -25,14 +25,14 @@ define('DISQUS_API_REMOVE', 2);
  */
 function disqus_help($path, $arg) {
   switch ($path) {
-  case 'admin/help#disqus':
+  case 'help.page.disqus':
     $output = '<p>'. t('Uses the <a href="@disqus">Disqus</a> comment system to enhance comments.', array('@disqus' => 'http://disqus.com')) .'</p>';
     $output.= '<h3>'. t('Installation') .'</h3>';
     $output.= '<ol><li>'. t('Register your site information at <a href="http://disqus.com">Disqus</a>') .'</li>';
     $output.= '<li>'. t('In the <a href="@configuration">Disqus configuration</a>, set the domain to what you registered with Disqus, and what node types you would like to have comments', array('@configuration' => url('admin/config/services/disqus'))) .'</li>';
     $output.= '<li>'. t('Visit the <a href="@permissions">permissions</a>, and set which users you would like to have the ability to view Disqus threads (recommended for role)', array('@permissions' => url('admin/people/permissions', array('fragment' => 'module-disqus')))) .'</li></ol>';
     return $output;
-  case 'admin/config/services/disqus':
+  case 'system.admin_config_services.disqus':
     return '<p>'. t('The following provides the general configuration options for the <a href="@disqus">Disqus</a> comment web service.', array('@disqus' => 'http://disqus.com')) .'</p>';
   }
 }
@@ -99,13 +99,13 @@ function disqus_element_post_render($children, &$element) {
 
   // Provide alternate language support if desired.
   if (\Drupal::config('disqus.settings')->get('behavior.disqus_localization')) {
-    global $language;
-    $disqus['language'] = $language->language;
+    $language = \Drupal::languageManager()->getCurrentLanguage();
+    $disqus['language'] = $language->id;
   }
 
   // Check if we are to provide Single Sign-On access.
   if (\Drupal::config('disqus.settings')->get('advanced.sso.disqus_sso')) {
-    $disqus += disqus_sso_disqus_settings($user);
+    $disqus += disqus_sso_disqus_settings($account);
   }
 
   /**
@@ -269,7 +269,7 @@ function disqus_node_delete($node) {
   db_delete('disqus')->condition('nid', $node->id())->execute();
 
   // Close/remove the thread on disqus if required.
-  $action = variable_get('disqus_api_delete', DISQUS_API_NO_ACTION);
+  $action = \Drupal::config('disqus.settings')->get('advanced.api.disqus_api_delete');
   if ($action != DISQUS_API_NO_ACTION) {
     $disqus = disqus_api();
     if ($disqus) {
@@ -324,7 +324,7 @@ function disqus_node_insert($node) {
  */
 function disqus_node_update($node) {
   // Update the thread information on disqus if required.
-  if (variable_get('disqus_api_update', FALSE) && ($node->disqus['title'] != $node->original->disqus['title'] || $node->disqus['url'] != $node->original->disqus['url'])) {
+  if (\Drupal::config('disqus.settings')->get('advanced.api.disqus_api_update') && ($node->disqus['title'] != $node->original->disqus['title'] || $node->disqus['url'] != $node->original->disqus['url'])) {
     $disqus = disqus_api();
     if ($disqus) {
       try {
@@ -510,33 +510,13 @@ function theme_disqus_noscript($variables = array()) {
 }
 
 /**
- * Implements hook_libraries_info().
- */
-function disqus_libraries_info() {
-  $libraries['disqusapi'] = array(
-    'name' => 'Disqus PHP API',
-    'vendor url' => 'https://github.com/disqus/disqus-php',
-    'download url' => 'https://github.com/disqus/disqus-php',
-    'version arguments' => array(
-      'file' => 'disqusapi.php',
-      'pattern' => '@version\s+([0-9a-zA-Z\.-]+)@',
-      'lines' => 20,
-    ),
-    'files' => array(
-      'php' => array('disqusapi.php'),
-    ),
-  );
-  return $libraries;
-}
-
-/**
  * Creates an instance of the Disqus PHP API.
  *
  * @return
  *   The instance of the Disqus API.
  */
 function disqus_api() {
-  if (module_exists('libraries') && ($library = libraries_load('disqusapi')) && !empty($library['loaded'])) {
+  if (\Drupal::moduleHandler()->moduleExists('libraries') && ($library = libraries_load('disqusapi')) && !empty($library['loaded'])) {
     try {
       $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
     }
@@ -680,16 +660,15 @@ function disqus_variable_group_info() {
  */
 function disqus_sso_disqus_settings($account = NULL) {
   if (!isset($account)) {
-    global $user;
-    $account = $user;
+    $account = \Drupal::currentUser();
   }
 
   $disqus['sso'] = array(
-    'name' => variable_get('site_name', t('Drupal')),
+    'name' => \Drupal::config('system.site')->get('name'),
     // The login window must be closed once the user logs in.
     'url' => url('user/login', array('query' => array('destination' => 'disqus/closewindow'))),
     // The logout link must redirect back to the original page.
-    'logout' => url('user/logout', array('query' => array('destination' => $_GET['q']))),
+    'logout' => url('user/logout', array('query' => array('destination' => current_path()))),
     'width' => 800,
     'height' => 600,
   );
@@ -697,16 +676,16 @@ function disqus_sso_disqus_settings($account = NULL) {
   $managed_logo = \Drupal::config('disqus.settings')->get('advanced.sso.disqus_logo');
   $use_site_logo = \Drupal::config('disqus.settings')->get('advanced.sso.disqus_use_site_logo');
   if (!$use_site_logo && $managed_logo !== FALSE) {
-    $disqus['sso']['button'] = file_create_url(file_load($managed_logo)->uri);
+    $disqus['sso']['button'] = file_create_url(file_load($managed_logo)->getFileUri());
   }
   elseif ($logo = theme_get_setting('logo')) {
-    $disqus['sso']['button'] = $logo;
+    $disqus['sso']['button'] = $logo['url'];
   }
   else {
     $disqus['sso']['button'] = url('misc/druplicon.png', array('absolute' => TRUE));
   }
   if ($favicon = theme_get_setting('favicon')) {
-    $disqus['sso']['icon'] = $favicon;
+    $disqus['sso']['icon'] = $favicon['url'];
   }
 
   // Stick the authentication requirements and data in the settings.
@@ -741,24 +720,25 @@ function disqus_sso_key_encode($data) {
  */
 function disqus_sso_user_data($account = NULL) {
   if (!isset($account)) {
-    global $user;
-    $account = $user;
+    $account = \Drupal::currentUser();
   }
 
   $data = array();
-  if ($account->uid > 0) {
-    $data['id'] = $account->uid;
-    $data['username'] = $account->name;
-    $data['email'] = $account->mail;
-    $data['url'] = url('user/' . $account->uid, array('absolute' => TRUE));
+  if (!$account->isAnonymous()) {
+    $data['id'] = $account->id();
+    $data['username'] = $account->getUsername();
+    $data['email'] = $account->getEmail();
+    $data['url'] = url('user/' . $account->id(), array('absolute' => TRUE));
 
     // Load the user's avatar.
-    $user_picture_default = variable_get('user_picture_default', '');
-    if (isset($account->picture) && !empty($account->picture) && is_numeric($account->picture) && $file = file_load($account->picture)) {
-      $data['avatar'] = !empty($file->uri) ? $file->uri : NULL;
+    $user_picture_default = \Drupal::config('field.instance.user.user.user_picture')->get('user_picture_default');
+
+    $user = user_load($account->id());
+    if (isset($user->user_picture) && !empty($user->user_picture) && $file = file_load($user->user_picture->target_id)) {
+      $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
     }
     elseif (!empty($user_picture_default)) {
-      $data['avatar'] = variable_get('user_picture_default', '');
+      $data['avatar'] = $user_picture_default;
     }
     if (isset($data['avatar'])) {
       $data['avatar'] = file_create_url($data['avatar']);

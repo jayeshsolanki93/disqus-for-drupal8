@@ -11,6 +11,9 @@ advanced:
   disqus_useraccesstoken: ''
   disqus_publickey: ''
   disqus_secretkey: ''
+  api:
+    disqus_api_update: false
+    disqus_api_delete: 'DISQUS_API_NO_ACTION'
   sso:
     disqus_sso: false
     disqus_use_site_logo: false

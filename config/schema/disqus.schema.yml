@@ -46,6 +46,16 @@ disqus.settings:
         disqus_secretkey:
           type: string
           label: 'Secret Key'
+        api:
+          type: mapping
+          label: 'Disqus API Settings'
+          mapping:
+            disqus_api_update:
+              type: boolean
+              label: 'Update Threads'
+            disqus_api_delete:
+              type: string
+              label: 'Close/Remove Thread'
         sso:
           type: mapping
           label: 'Single Sign-On'
