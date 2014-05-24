@@ -139,7 +139,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#title' => t('Secret Key'),
       '#default_value' => $disqus_config->get('advanced.disqus_secretkey'),
     );
-  if (!module_exists('libraries') || (module_exists('libraries') && ($library = libraries_detect('disqusapi')) && empty($library['installed']))) {
+  if (!\Drupal::moduleHandler()->moduleExists('libraries') || (\Drupal::moduleHandler()->moduleExists('libraries') && ($library = libraries_detect('disqusapi')) && empty($library['installed']))) {
     $form['advanced']['api'] = array(
       '#weight' => 4,
       '#type' => 'fieldset',
@@ -249,12 +249,18 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('advanced.disqus_useraccesstoken', $form_state['values']['disqus_useraccesstoken'])
       ->set('advanced.disqus_publickey', $form_state['values']['disqus_publickey'])
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
-      ->set('advanced.api.disqus_api_update', $form_state['values']['disqus_api_update'])
-      ->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])
       ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
       ->set('advanced.sso.disqus_use_site_logo', $form_state['values']['disqus_use_site_logo'])
       ->set('advanced.sso.disqus_logo', $form_state['values']['disqus_logo'])
       ->save();
+
+    if(isset($form_state['values']['disqus_api_update'])) {
+      $config->set('advanced.api.disqus_api_update', $form_state['values']['disqus_api_update'])->save();
+    }
+
+    if(isset($form_state['values']['disqus_api_delete'])) {
+      $config->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])->save();
+    }
 
     parent::submitForm($form, $form_state);
 
