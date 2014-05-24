@@ -225,9 +225,30 @@ function disqus_node_view(array &$build, \Drupal\node\NodeInterface $node, \Drup
               '#disqus' => $node->disqus,
               '#weight' => $disqus_config->get('visibility.disqus_weight'),
             );
+            $build['#cache']['bin'] = 'render';
+            $build['#cache']['keys'] = array(
+              'disqus',
+              'disqus_comments',
+              'node',
+            );
             break;
         }
         break;
+    }
+  }
+  else {
+    return array();
+  }
+}
+
+/**
+ * Implements hook_node_links_alter().
+ */
+function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface $node, array &$context) {
+  $disqus_config = \Drupal::config('disqus.settings');
+
+  if (isset($node->disqus) && \Drupal::currentUser()->hasPermission('view disqus comments') && $node->disqus['status'] == 1) {
+    switch ($context['view_mode']) {
       case 'teaser':
         // Display the Disqus link.
         $links['disqus_comments_num'] = array(
@@ -240,7 +261,7 @@ function disqus_node_view(array &$build, \Drupal\node\NodeInterface $node, \Drup
             'data-disqus-identifier' => 'node/' . $node->id(),
           ),
         );
-        $build['links']['disqus'] = array(
+        $node_links['disqus'] = array(
           '#theme' => 'links',
           '#links' => $links,
           '#attributes' => array(
@@ -249,16 +270,13 @@ function disqus_node_view(array &$build, \Drupal\node\NodeInterface $node, \Drup
         );
 
         // Attach disqus.js to load the Disqus comment count JavaScript.
-        $build['links']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
-        $build['links']['#attached']['js'][] = array(
+        $node_links['disqus']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
+        $node_links['disqus']['#attached']['js'][] = array(
           'data' => array('disqusComments' => $node->disqus['domain']),
           'type' => 'setting',
         );
-        break;
+      break;
     }
-  }
-  else {
-    return array();
   }
 }
 
@@ -404,6 +422,12 @@ function disqus_user_view(array &$build, \Drupal\user\UserInterface $account, \D
           '#disqus' => $account->disqus,
           '#weight' => \Drupal::config('disqus.settings')->get('visibility.disqus_weight'),
           '#access' => \Drupal::currentUser()->hasPermission('view disqus comments'),
+        );
+        $build['#cache']['bin'] = 'render';
+        $build['#cache']['keys'] = array(
+          'disqus',
+          'disqus_comments',
+          'node',
         );
         break;
     }
