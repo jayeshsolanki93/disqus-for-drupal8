@@ -67,15 +67,25 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
    * Build the disqus comment block for node entity.
    */
   protected function buildForNodeEntity($object) {
-      // For nodes, display if the Disqus object is enabled.
-      if (isset($object->disqus) && $object->disqus['status']) {
-        return array(
-          'disqus' => array(
-            '#type' => 'disqus',
-            '#disqus' => $object->disqus,
+    // For nodes, display if the Disqus object is enabled.
+    if (isset($object->disqus) && $object->disqus['status']) {
+      return array(
+        'disqus' => array(
+          '#type' => 'disqus',
+          '#disqus' => $object->disqus,
+          '#post_render_cache' => array(
+            'disqus_element_post_render_cache' => array(
+              array('node' => $object->disqus),
+            ),
           ),
-        );
-      }
+          '#cache' => array(
+            'bin' => 'render',
+            'keys' => array('disqus', 'disqus_comments', 'node', $object->id()),
+            'tags' => array('content' => TRUE),
+          ),
+        ),
+      );
+    }
   }
 
   /**
@@ -87,6 +97,15 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
         'disqus' => array(
           '#type' => 'disqus',
           '#disqus' => $object->disqus,
+          '#post_render_cache' => array(
+            'disqus_element_post_render_cache' => array(
+              array('node' => $object->disqus),
+            ),
+          ),
+          '#cache' => array(
+            'bin' => 'render',
+            'keys' => array('disqus', 'disqus_comments', 'user', $object->id()),
+          ),
         ),
       );
     }

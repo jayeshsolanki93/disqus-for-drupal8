@@ -69,7 +69,6 @@ function disqus_element_info() {
     '#disqus' => array(),
     '#theme_wrappers' => array('disqus_noscript', 'container'),
     '#attributes' => array('id' => 'disqus_thread'),
-    '#post_render' => array('disqus_element_post_render'),
   );
   return $types;
 }
@@ -77,15 +76,16 @@ function disqus_element_info() {
 /**
  * Post render function of the Disqus element to inject the Disqus JavaScript.
  */
-function disqus_element_post_render($children, &$element) {
+function disqus_element_post_render_cache(array $element, array $context) {
   // Construct the settings to be passed in for Disqus.
+  $data = $context['node'];
   $disqus = array(
-    'domain' => $element['#disqus']['domain'],
-    'url' => $element['#disqus']['url'],
-    'title' => $element['#disqus']['title'],
-    'identifier' => $element['#disqus']['identifier'],
+    'domain' => $data['domain'],
+    'url' => $data['url'],
+    'title' => $data['title'],
+    'identifier' => $data['identifier'],
   );
-  if (isset($element['#disqus']['developer']) && $element['#disqus']['developer']) {
+  if (isset($data['developer']) && $data['developer']) {
     $disqus['developer'] = 1;
   }
 
@@ -135,7 +135,7 @@ drupal_set_message(var_dump($disqus));
       'disqus' => $disqus,
     ),
   );
-  return $children;
+  return $element;
 }
 
 /**
@@ -224,6 +224,11 @@ function disqus_node_view(array &$build, \Drupal\node\NodeInterface $node, \Drup
               '#type' => 'disqus',
               '#disqus' => $node->disqus,
               '#weight' => $disqus_config->get('visibility.disqus_weight'),
+              '#post_render_cache' => array(
+                'disqus_element_post_render_cache' => array(
+                   array('node' => $node->disqus),
+                ),
+               ),
             );
             $build['#cache']['bin'] = 'render';
             $build['#cache']['keys'] = array(
@@ -422,6 +427,11 @@ function disqus_user_view(array &$build, \Drupal\user\UserInterface $account, \D
           '#disqus' => $account->disqus,
           '#weight' => \Drupal::config('disqus.settings')->get('visibility.disqus_weight'),
           '#access' => \Drupal::currentUser()->hasPermission('view disqus comments'),
+          '#post_render_cache' => array(
+            'disqus_element_post_render_cache' => array(
+              array('node' => $account->disqus),
+            ),
+          ),
         );
         $build['#cache']['bin'] = 'render';
         $build['#cache']['keys'] = array(
