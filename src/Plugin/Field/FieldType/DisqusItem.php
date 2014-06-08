@@ -41,16 +41,8 @@ class DisqusItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public static function propertyDefinitions(FieldStorageDefinitionInterface $field_definition) {
-    $properties = parent::propertyDefinitions($field_definition);
 
-    return $properties;
-  }
-
-  /**
-   * {@inheritdoc}
-   */
-  public function update() {
-
+    return array();
   }
 
   /**

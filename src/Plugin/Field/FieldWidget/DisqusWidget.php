@@ -8,7 +8,7 @@
 namespace Drupal\disqus\Plugin\Field\FieldWidget;
 
 use Drupal\Core\Field\WidgetBase;
-use Drupal\Core\Field\FieldItemListInterface
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Plugin implementation of the 'disqus' widget.
@@ -26,7 +26,7 @@ class DisqusWidget extends WidgetBase {
   /**
    * {@inheritdoc}
    */
- public function formElement(FieldItemListInterface $item, $delta, array $element, array &$form, array &$form_state) {
+ public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
       if (!isset($element['comment_settings'])) {
         $element['comment_settings'] = array(
           '#type' => 'fieldset',
@@ -43,9 +43,11 @@ class DisqusWidget extends WidgetBase {
         '#title' => t('Disqus comments'),
         '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
         // @TODO: Check default value
-        '#default_value' => $item[$delta]->status,
+        '#default_value' => $items[$delta]->status,
         '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
       );
 
    return $element;
  }
+
+}

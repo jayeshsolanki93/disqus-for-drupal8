@@ -78,16 +78,16 @@ function disqus_element_info() {
  */
 function disqus_element_post_render_cache(array $element, array $context) {
   // Construct the settings to be passed in for Disqus.
-  $data = $context['node'];
+  $data = $context['entity'];
+
   $disqus = array(
-    'domain' => $data['domain'],
-    'url' => $data['url'],
-    'title' => $data['title'],
-    'identifier' => $data['identifier'],
+    'domain' => \Drupal::config('disqus.settings')->get('disqus_domain'),
+    'url' => url($data['entity_type']  . '/' . $data['entity_id'], array('absolute' => TRUE)),
+    'title' => '',
+    'identifier' => "{$data['entity_type']}/{$data['entity_id']}",
   );
-  if (isset($data['developer']) && $data['developer']) {
-    $disqus['developer'] = 1;
-  }
+
+  $disqus['developer'] = \Drupal::config('disqus.settings')->get('behavior.disqus_developer');
 
   // If the user is logged in, we can inject the username and email for Disqus.
   $account = \Drupal::currentUser();
