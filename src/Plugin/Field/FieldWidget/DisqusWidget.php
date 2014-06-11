@@ -27,6 +27,7 @@ class DisqusWidget extends WidgetBase {
    * {@inheritdoc}
    */
  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
+      drupal_set_message(var_dump($items[$delta]));
       if (!isset($element['comment_settings'])) {
         $element['comment_settings'] = array(
           '#type' => 'fieldset',
@@ -43,7 +44,7 @@ class DisqusWidget extends WidgetBase {
         '#title' => t('Disqus comments'),
         '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
         // @TODO: Check default value
-        '#default_value' => $items[$delta]->status,
+        '#default_value' => isset($items[$delta]->status) ? $items[$delta]->status : NULL,
         '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
       );
 
