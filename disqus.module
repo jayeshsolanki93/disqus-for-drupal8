@@ -83,7 +83,7 @@ function disqus_element_post_render_cache(array $element, array $context) {
   $disqus = array(
     'domain' => \Drupal::config('disqus.settings')->get('disqus_domain'),
     'url' => url($data['entity_type']  . '/' . $data['entity_id'], array('absolute' => TRUE)),
-    'title' => '',
+    'title' => $data['entity_label'],
     'identifier' => "{$data['entity_type']}/{$data['entity_id']}",
   );
 
@@ -163,109 +163,33 @@ function disqus_field_extra_fields() {
 }
 
 /**
- * Implements hook_node_load().
- */
-function disqus_node_load($nodes) {
-  $disqus_config = \Drupal::config('disqus.settings');
-
-  // Make sure we only load Disqus on nodes of the desired types.
-  $disqustypes = $disqus_config->get('visibility.disqus_nodetypes');
-
-  // Check which Disqus domain to use.
-  $domain = $disqus_config->get('disqus_domain');
-  if (!empty($domain)) {
-    // Load Disqus into the nodes.
-    foreach ($nodes as &$node) {
-      if (!empty($disqustypes[$node->getType()])) {
-        // Save the data to the node object.
-        $node->disqus = array('domain' => $domain);
-
-        // Apply the Disqus status to the node.
-        $status = db_query("SELECT status FROM {disqus} WHERE nid = :nid", array(':nid' => $node->id()))->fetchObject();
-        $node->disqus['status'] = isset($status->status) ? (bool)$status->status : TRUE;
-
-        // Build the absolute URL without the alias for the disqus_url flag.
-        $node->disqus['url'] = url('node/' . $node->id(), array(
-          'absolute' => TRUE,
-        ));
-
-        // Build the title.
-        $node->disqus['title'] = check_plain(strip_tags($node->getTitle()));
-
-        // Provide the identifier.
-        $node->disqus['identifier'] = 'node/' . $node->id();
-
-        // The developer flag must always be set when the node is unpublished.
-        if (!$node->isPublished()) {
-          $node->disqus['developer'] = 1;
-        }
-        elseif ($developer = $disqus_config->get('behavior.disqus_developer')) {
-          $node->disqus['developer'] = (int) $developer;
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_node_view().
- */
-function disqus_node_view(array &$build, \Drupal\node\NodeInterface $node, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode) {
-  $disqus_config = \Drupal::config('disqus.settings');
-
-  if (isset($node->disqus) && \Drupal::currentUser()->hasPermission('view disqus comments') && $node->disqus['status'] == 1) {
-    switch ($view_mode) {
-      case 'full':
-        // Inject Disqus into the node object.
-        switch ($disqus_config->get('visibility.disqus_location')) {
-          case 'content_area':
-            // Inject into the node content.
-            $build['disqus'] = array(
-              '#type' => 'disqus',
-              '#disqus' => $node->disqus,
-              '#weight' => $disqus_config->get('visibility.disqus_weight'),
-              '#post_render_cache' => array(
-                'disqus_element_post_render_cache' => array(
-                   array('node' => $node->disqus),
-                ),
-               ),
-            );
-            $build['#cache']['bin'] = 'render';
-            $build['#cache']['keys'] = array(
-              'disqus',
-              'disqus_comments',
-              'node',
-            );
-            break;
-        }
-        break;
-    }
-  }
-  else {
-    return array();
-  }
-}
-
-/**
  * Implements hook_node_links_alter().
  */
 function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface $node, array &$context) {
-  $disqus_config = \Drupal::config('disqus.settings');
-
-  if (isset($node->disqus) && \Drupal::currentUser()->hasPermission('view disqus comments') && $node->disqus['status'] == 1) {
-    switch ($context['view_mode']) {
-      case 'teaser':
-        // Display the Disqus link.
-        $links['disqus_comments_num'] = array(
-          'title' => t('Comments'),
-          'href' => 'node/' . $node->id(),
-          'fragment' => 'disqus_thread',
-          'attributes' => array(
-            // Identify the node for Disqus with the unique identifier:
-            // http://docs.disqus.com/developers/universal/#comment-count
-            'data-disqus-identifier' => 'node/' . $node->id(),
-          ),
-        );
+  $fields = \Drupal::service('disqus.manager')->getFields('node');
+  foreach ($fields as $field_name => $detail) {
+    //Skip fields that the node does not have.
+    if(!$node->hasField($field_name)) {
+      continue;
+    }
+    $links = array();
+    $commenting_status = $node->get($field_name)->status;
+    if ($commenting_status) {
+      $field_definition = $node->getFieldDefinition($field_name);
+      if (\Drupal::currentUser()->hasPermission('view disqus comments')) {
+        if ($context['view_mode'] === 'teaser') {
+            // Display the Disqus link.
+            $links['disqus_comments_num'] = array(
+              'title' => t('Comments'),
+              'href' => 'node/' . $node->id(),
+              'fragment' => 'disqus_thread',
+              'attributes' => array(
+                // Identify the node for Disqus with the unique identifier:
+                // http://docs.disqus.com/developers/universal/#comment-count
+                'data-disqus-identifier' => 'node/' . $node->id(),
+              ),
+            );
+        }
         $node_links['disqus'] = array(
           '#theme' => 'links',
           '#links' => $links,
@@ -277,10 +201,10 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
         // Attach disqus.js to load the Disqus comment count JavaScript.
         $node_links['disqus']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
         $node_links['disqus']['#attached']['js'][] = array(
-          'data' => array('disqusComments' => $node->disqus['domain']),
+          'data' => array('disqusComments' => \Drupal::config('disqus.settings')->get('disqus_domain')),
           'type' => 'setting',
         );
-      break;
+      }
     }
   }
 }
@@ -377,118 +301,6 @@ function disqus_node_update($node) {
     }
     else {
       disqus_node_insert($node);
-    }
-  }
-}
-
-/**
- * Implements hook_user_load().
- */
-function disqus_user_load($users) {
-  $disqus_config = \Drupal::config('disqus.settings');
-
-  // Check which Disqus domain to use.
-  $domain = $disqus_config->get('disqus_domain');
-  if (!empty($domain)) {
-    foreach ($users as &$account) {
-      // Only show on the profile if desired. Don't show on the administrator's profile.
-      if (\Drupal::currentUser()->hasPermission('display disqus comments on profile', $account)) {
-        // Save the data to the user object.
-        $account->disqus = array('domain' => $domain);
-
-        // Build the absolute URL without the alias for the disqus_url flag.
-        $account->disqus['url'] = url('user/' . $account->id(), array('absolute' => TRUE));
-
-        // Build the title.
-        $account->disqus['title'] = check_plain(strip_tags($account->getUsername()));
-
-        // Provide the identifier.
-        $account->disqus['identifier'] = 'user/' . $account->id();
-
-        // Inject the script.
-        if ($developer = $disqus_config->get('behavior.disqus_developer')) {
-          $account->disqus['developer'] = (int) $developer;
-        }
-      }
-    }
-  }
-}
-
-/**
- * Implements hook_user_view().
- */
-function disqus_user_view(array &$build, \Drupal\user\UserInterface $account, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display, $view_mode, $langcode) {
-  if (isset($account->disqus) && $view_mode == 'full') {
-    // Inject Disqus into the user object.
-    switch (\Drupal::config('disqus.settings')->get('visibility.disqus_location')) {
-      case 'content_area':
-        $build['disqus'] = array(
-          '#type' => 'disqus',
-          '#disqus' => $account->disqus,
-          '#weight' => \Drupal::config('disqus.settings')->get('visibility.disqus_weight'),
-          '#access' => \Drupal::currentUser()->hasPermission('view disqus comments'),
-          '#post_render_cache' => array(
-            'disqus_element_post_render_cache' => array(
-              array('node' => $account->disqus),
-            ),
-          ),
-        );
-        $build['#cache']['bin'] = 'render';
-        $build['#cache']['keys'] = array(
-          'disqus',
-          'disqus_comments',
-          'node',
-        );
-        break;
-    }
-  }
-}
-
-/**
- * Implementation of hook_form_alter().
- */
-function disqus_form_alter(&$form, $form_state, $form_id) {
-  // Allow toggling the comments on or off per node from the node edit form.
-  if (!empty($form['#node_edit_form'])) {
-    $node = $form['#node'];
-    // Only display the toggle Disqus comments setting if comments are available
-    // for the given node type.
-    $types = \Drupal::config('disqus.settings')->get('visibility.disqus_nodetypes');
-    if (isset($types[$node->getType()]) && !empty($types[$node->getType()])) {
-      // Add a comment settings fieldset for users with "toggle disqus comments" permission
-      // when Drupal core Comments module is disabled.
-      if (!isset($form['comment_settings'])) {
-        $form['comment_settings'] = array(
-          '#type' => 'fieldset',
-          '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
-          '#title' => t('Comment settings'),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-          '#group' => 'additional_settings',
-          '#weight' => 30,
-          '#attached' => array(
-            'js' => array(drupal_get_path('module', 'disqus') . '/disqus-node-form.js'),
-          ),
-        );
-      }
-      else {
-        if (isset($form['comment_settings']['comment'])) {
-          // Ensure only core Comment administrators see Comment module settings
-          $form['comment_settings']['comment']['#access'] = $form['comment_settings']['#access'];
-          // But reveal parent comment settings fieldset if user has toggle permission
-          $form['comment_settings']['#access'] = \Drupal::currentUser()->hasPermission('toggle disqus comments');
-		  // Add the Javascript for tab text.
-          $form['comment_settings']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus-node-form.js';
-        }
-      }
-      // Add the Disqus settings into the comment settings fieldset for users with toggle permission.
-      $form['comment_settings']['disqus_status'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Disqus comments'),
-        '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
-        '#default_value' => isset($node->disqus['status']) ? $node->disqus['status'] : TRUE,
-        '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
-      );
     }
   }
 }
@@ -768,7 +580,7 @@ function disqus_sso_user_data($account = NULL) {
     $user_picture_default = \Drupal::config('field.instance.user.user.user_picture')->get('user_picture_default');
 
     $user = user_load($account->id());
-    if (isset($user->user_picture) && !empty($user->user_picture) && $file = file_load($user->user_picture->target_id)) {
+    if (isset($user->user_picture->target_id) && !empty($user->user_picture->target_id) && $file = file_load($user->user_picture->target_id)) {
       $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
     }
     elseif (!empty($user_picture_default)) {

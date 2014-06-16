@@ -72,13 +72,13 @@ class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInt
    */
   public function viewElements(FieldItemListInterface $items) {
     $element = array();
-    drupal_set_message(var_dump($items->status));
-    $field_name = $this->fieldDefinition->getName();
-    $entity = $items->getEntity();
-    if($this->currentUser->hasPermission('view disqus comments')) {
+
+    if($items->status == 1 && $this->currentUser->hasPermission('view disqus comments')) {
+      $entity = $items->getEntity();
       $context = array(
         'entity_type' => $entity->getEntityTypeId(),
         'entity_id' => $entity->id(),
+        'entity_label' => $entity->label(),
       );
       $element[] = array(
         '#type' => 'disqus',

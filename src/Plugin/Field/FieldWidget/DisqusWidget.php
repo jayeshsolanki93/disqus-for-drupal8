@@ -27,27 +27,25 @@ class DisqusWidget extends WidgetBase {
    * {@inheritdoc}
    */
  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
-      drupal_set_message(var_dump($items[$delta]));
-      if (!isset($element['comment_settings'])) {
-        $element['comment_settings'] = array(
-          '#type' => 'fieldset',
-          '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
-          '#title' => t('Comment settings'),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
-          '#group' => 'additional_settings',
-          '#weight' => 30,
-        );
-      }
-      $element['comment_settings']['disqus_status'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Disqus comments'),
-        '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
-        // @TODO: Check default value
-        '#default_value' => isset($items[$delta]->status) ? $items[$delta]->status : NULL,
-        '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
-      );
+    $status = $items->status;
 
+    $element['status'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Disqus Comments'),
+      '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
+      // @TODO: Check default value
+      '#default_value' => $status,
+      '#access' => \Drupal::currentUser()->hasPermission('toggle disqus comments'),
+    );
+    // If the advanced settings tabs-set is available (normally rendered in the
+    // second column on wide-resolutions), place the field as a details element
+    // in this tab-set.
+    if (isset($form['advanced'])) {
+      $element += array(
+        '#type' => 'details',
+        '#group' => 'advanced',
+      );
+    }
    return $element;
  }
 
