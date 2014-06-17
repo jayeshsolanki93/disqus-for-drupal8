@@ -78,13 +78,12 @@ function disqus_element_info() {
  */
 function disqus_element_post_render_cache(array $element, array $context) {
   // Construct the settings to be passed in for Disqus.
-  $data = $context['entity'];
-
+  $entity = $context['entity'];
   $disqus = array(
     'domain' => \Drupal::config('disqus.settings')->get('disqus_domain'),
-    'url' => url($data['entity_type']  . '/' . $data['entity_id'], array('absolute' => TRUE)),
-    'title' => $data['entity_label'],
-    'identifier' => "{$data['entity_type']}/{$data['entity_id']}",
+    'url' => $entity->url(),
+    'title' => $entity->label(),
+    'identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}",
   );
 
   $disqus['developer'] = \Drupal::config('disqus.settings')->get('behavior.disqus_developer');
@@ -173,15 +172,14 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
       continue;
     }
     $links = array();
-    $commenting_status = $node->get($field_name)->status;
-    if ($commenting_status) {
+    if ($node->get($field_name)->status) {
       $field_definition = $node->getFieldDefinition($field_name);
       if (\Drupal::currentUser()->hasPermission('view disqus comments')) {
         if ($context['view_mode'] === 'teaser') {
             // Display the Disqus link.
             $links['disqus_comments_num'] = array(
               'title' => t('Comments'),
-              'href' => 'node/' . $node->id(),
+              'href' => $node->url(),
               'fragment' => 'disqus_thread',
               'attributes' => array(
                 // Identify the node for Disqus with the unique identifier:

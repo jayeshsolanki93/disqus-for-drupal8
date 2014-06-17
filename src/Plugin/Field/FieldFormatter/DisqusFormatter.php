@@ -19,7 +19,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *
  * @FieldFormatter(
  *   id = "disqus_comment",
- *   label = @Translation("Default"),
+ *   label = @Translation("Disqus comment"),
  *   field_types = {
  *     "disqus_comment"
  *   }
@@ -27,6 +27,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInterface {
 
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
   protected $currentUser;
 
   /**
@@ -74,17 +79,11 @@ class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInt
     $element = array();
 
     if($items->status == 1 && $this->currentUser->hasPermission('view disqus comments')) {
-      $entity = $items->getEntity();
-      $context = array(
-        'entity_type' => $entity->getEntityTypeId(),
-        'entity_id' => $entity->id(),
-        'entity_label' => $entity->label(),
-      );
       $element[] = array(
         '#type' => 'disqus',
         '#post_render_cache' => array(
           'disqus_element_post_render_cache' => array(
-            array('entity' => $context),
+            array('entity' => $items->getEntity()),
           ),
         ),
       );

@@ -66,7 +66,8 @@ class DisqusItem extends FieldItemBase {
    * {@inheritdoc}
    */
   public function isEmpty() {
-    return FALSE;
+    $value = $this->get('status')->getValue();
+    return $value === NULL || $value === '';
   }
 
 }
