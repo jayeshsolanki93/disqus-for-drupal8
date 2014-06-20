@@ -26,7 +26,7 @@ define('DISQUS_API_REMOVE', 2);
  * Implements hook_help().
  */
 function disqus_help($route_name, Request $request) {
-  switch ($request_name) {
+  switch ($route_name) {
     case 'help.page.disqus':
       $output = '<p>'. t('Uses the <a href="@disqus">Disqus</a> comment system to enhance comments.', array('@disqus' => 'http://disqus.com')) .'</p>';
       $output.= '<h3>'. t('Installation') .'</h3>';
