@@ -173,7 +173,6 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
     }
     $links = array();
     if ($node->get($field_name)->status) {
-      $field_definition = $node->getFieldDefinition($field_name);
       if (\Drupal::currentUser()->hasPermission('view disqus comments')) {
         if ($context['view_mode'] === 'teaser') {
             // Display the Disqus link.

@@ -53,7 +53,7 @@ class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInt
    *   The current user.
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, AccountInterface $current_user) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode);
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, array());
     $this->currentUser = $current_user;
   }
 

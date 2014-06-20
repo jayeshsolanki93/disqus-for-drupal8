@@ -38,7 +38,7 @@ class DisqusWidget extends WidgetBase implements ContainerFactoryPluginInterface
    * {@inheritdoc}
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, AccountInterface $current_user) {
-   parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings);
+   parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, array());
     $this->currentUser = $current_user;
   }
 
@@ -58,7 +58,7 @@ class DisqusWidget extends WidgetBase implements ContainerFactoryPluginInterface
   /**
    * {@inheritdoc}
    */
- public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, array &$form_state) {
 
     $element['status'] = array(
       '#type' => 'checkbox',

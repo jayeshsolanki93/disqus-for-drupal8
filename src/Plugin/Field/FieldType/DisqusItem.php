@@ -51,20 +51,6 @@ class DisqusItem extends FieldItemBase {
   /**
    * {@inheritdoc}
    */
-  public function __get($name) {
-    if ($name == 'status' && !isset($this->values[$name])) {
-      // Get default value from field instance when no data saved in entity.
-      $field_default_values = $this->getFieldDefinition()->getDefaultValue($this->getEntity());
-      return $field_default_values[0]['status'];
-    }
-    else {
-      return parent::__get($name);
-    }
-  }
-
-  /**
-   * {@inheritdoc}
-   */
   public function isEmpty() {
     $value = $this->get('status')->getValue();
     return $value === NULL || $value === '';
