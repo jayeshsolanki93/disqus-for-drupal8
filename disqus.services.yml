@@ -1,0 +1,4 @@
+services:
+  disqus.manager:
+    class: Drupal\disqus\DisqusCommentManager
+    arguments: ['@entity.manager']
