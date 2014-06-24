@@ -7,10 +7,20 @@ class DisqusController {
    * Menu callback; Automatically closes the window after the user logs in.
    *
    * @return
-   *   Confirmation message and link that closes overlay window.
+   *   A render array containing the confirmation message and link that closes overlay window.
    */
   public function closeWindow() {
-    _drupal_add_js('window.close();', 'inline');
-    return t('Thank you for logging in. Please close this window, or <a href="@clickhere">click here</a> to continue.', array('@clickhere' => 'javascript:window.close();'));
+     $build = array(
+       '#markup'=> t('Thank you for logging in. Please close this window, or <a href="!clickhere">click here</a> to continue.', array('!clickhere' => 'javascript:window.close();')),
+       '#attached' => array(
+         'js' => array(
+           array(
+             'type' => 'inline',
+             'data' => 'window.close();',
+           ),
+         ),
+       ),
+     );
+     return $build;
   }
 }
