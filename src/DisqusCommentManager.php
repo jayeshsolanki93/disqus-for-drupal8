@@ -64,7 +64,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
   /**
    * {@inheritdoc}
    */
-  function disqus_sso_disqus_settings() {
+  public function disqus_sso_disqus_settings() {
 
     $disqus['sso'] = array(
       'name' => \Drupal::config('system.site')->get('name'),
@@ -93,7 +93,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
 
     // Stick the authentication requirements and data in the settings.
     $disqus['api_key'] = \Drupal::config('disqus.settings')->get('advanced.disqus_publickey');
-    $disqus['remote_auth_s3'] = disqus_sso_key_encode(disqus_sso_user_data());
+    $disqus['remote_auth_s3'] = $this->disqus_sso_key_encode($this->disqus_sso_user_data());
 
     return $disqus;
   }
@@ -101,7 +101,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
   /**
    * {@inheritdoc}
    */
-  function disqus_sso_key_encode($data) {
+  public function disqus_sso_key_encode($data) {
     // Encode the data to be sent off to Disqus.
     $message = base64_encode(json_encode($data));
     $timestamp = time();
@@ -113,7 +113,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
   /**
    * {@inheritdoc}
    */
-  function disqus_sso_user_data() {
+  public function disqus_sso_user_data() {
 
     $account = \Drupal::currentUser();
 

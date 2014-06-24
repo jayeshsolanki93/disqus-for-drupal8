@@ -51,13 +51,13 @@ interface DisqusCommentManagerInterface {
    *
    * @return string
    */
-  function disqus_sso_key_encode($data);
+  public function disqus_sso_key_encode($data);
 
   /**
    * Assembles user-specific data used by Disqus SSO.
    *
    * @return array
    */
-  function disqus_sso_user_data();
+  public function disqus_sso_user_data();
 
 }
