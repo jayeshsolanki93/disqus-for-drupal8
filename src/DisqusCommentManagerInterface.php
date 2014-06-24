@@ -34,4 +34,30 @@ interface DisqusCommentManagerInterface {
    */
   public function getAllFields();
 
+  /**
+   * Computes the full settings associated with Disqus SSO.
+   *
+   * These need to be merged into the settings for basic Disqus integration for
+   * actual usage.
+   *
+   * @return array
+   */
+  public function disqus_sso_disqus_settings();
+
+  /**
+   * Assembles the full private key for use in SSO authentication.
+   *
+   * @param array $data
+   *
+   * @return string
+   */
+  function disqus_sso_key_encode($data);
+
+  /**
+   * Assembles user-specific data used by Disqus SSO.
+   *
+   * @return array
+   */
+  function disqus_sso_user_data();
+
 }
