@@ -5,6 +5,8 @@
  * The Disqus Drupal module.
  */
 
+use Symfony\Component\HttpFoundation\Request;
+
 /**
  * API No action on node delete.
  */
@@ -23,17 +25,17 @@ define('DISQUS_API_REMOVE', 2);
 /**
  * Implements hook_help().
  */
-function disqus_help($path, $arg) {
-  switch ($path) {
-  case 'help.page.disqus':
-    $output = '<p>'. t('Uses the <a href="@disqus">Disqus</a> comment system to enhance comments.', array('@disqus' => 'http://disqus.com')) .'</p>';
-    $output.= '<h3>'. t('Installation') .'</h3>';
-    $output.= '<ol><li>'. t('Register your site information at <a href="http://disqus.com">Disqus</a>') .'</li>';
-    $output.= '<li>'. t('In the <a href="@configuration">Disqus configuration</a>, set the domain to what you registered with Disqus, and what node types you would like to have comments', array('@configuration' => url('admin/config/services/disqus'))) .'</li>';
-    $output.= '<li>'. t('Visit the <a href="@permissions">permissions</a>, and set which users you would like to have the ability to view Disqus threads (recommended for role)', array('@permissions' => url('admin/people/permissions', array('fragment' => 'module-disqus')))) .'</li></ol>';
-    return $output;
-  case 'system.admin_config_services.disqus':
-    return '<p>'. t('The following provides the general configuration options for the <a href="@disqus">Disqus</a> comment web service.', array('@disqus' => 'http://disqus.com')) .'</p>';
+function disqus_help($route_name, Request $request) {
+  switch ($route_name) {
+    case 'help.page.disqus':
+      $output = '<p>'. t('Uses the <a href="!disqus">Disqus</a> comment system to enhance comments.', array('!disqus' => 'http://disqus.com')) .'</p>';
+      $output.= '<h3>'. t('Installation') .'</h3>';
+      $output.= '<ol><li>'. t('Register your site information at <a href="!disqus">Disqus</a>', array('!disqus' => 'http://disqus.com')) .'</li>';
+      $output.= '<li>'. t('In the <a href="!configuration">Disqus configuration</a>, set the domain to what you registered with Disqus, and what node types you would like to have comments', array('!configuration' => \Drupal::url('disqus.settings'))) .'</li>';
+      $output.= '<li>'. t('Visit the <a href="!permissions">permissions</a>, and set which users you would like to have the ability to view Disqus threads (recommended for role)', array('!permissions' => \Drupal::url('user.admin_permissions', array(), array('fragment' => 'module-disqus')))) .'</li></ol>';
+      return $output;
+    case 'disqus.settings':
+      return '<p>'. t('The following provides the general configuration options for the <a href="!disqus">Disqus</a> comment web service.', array('!disqus' => 'http://disqus.com')) .'</p>';
   }
 }
 
