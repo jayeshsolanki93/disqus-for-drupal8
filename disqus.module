@@ -192,12 +192,9 @@ function disqus_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
     return;
   }
 
-  $fields = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
-  foreach ($fields as $field_name => $detail) {
-    if($entity->hasField($field_name)) {
-      continue;
-    }
-    return;
+  $field = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
+  if(!$entity->hasField(key($field))) {
+      return;
   }
 
   $config = \Drupal::config('disqus.settings');
@@ -247,13 +244,11 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
     return;
   }
 
-  $fields = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
-  foreach ($fields as $field_name => $detail) {
-    if($entity->hasField($field_name)) {
-      continue;
-    }
-    return;
+  $field = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
+  if(!$entity->hasField(key($field))) {
+      return;
   }
+
   $config = \Drupal::config('disqus.settings');
   // Update the thread information on disqus if required.
   if ($config->get('advanced.api.disqus_api_update') && ($entity->label() != $entity->original->label() || $entity->url() != $entity->original->url())) {
