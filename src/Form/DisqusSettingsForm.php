@@ -139,7 +139,6 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#title' => t('Secret Key'),
       '#default_value' => $disqus_config->get('advanced.disqus_secretkey'),
     );
-  if (!\Drupal::moduleHandler()->moduleExists('libraries') || (\Drupal::moduleHandler()->moduleExists('libraries') && ($library = libraries_detect('disqusapi')) && empty($library['installed']))) {
     $form['advanced']['api'] = array(
       '#weight' => 4,
       '#type' => 'fieldset',
@@ -151,34 +150,37 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
     );
-    $form['advanced']['api']['disqus_api_update'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Update Threads'),
-      '#description' => t('Update node titles and links via the disqus api when saving. (Requires your user access token.)'),
-      '#default_value' => $disqus_config->get('advanced.api.disqus_api_update'),
-      '#states' => array(
-        'enabled' => array(
-          'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
-        ),
-      ),
-    );
-    $form['advanced']['api']['disqus_api_delete'] = array(
-      '#type' => 'select',
-      '#title' => t('Close/Remove Threads'),
-      '#description' => t('Action to take when deleting a node. (Requires your user access token.)'),
-      '#default_value' => $disqus_config->get('advanced.api.disqus_api_delete'),
-      '#options' => array(
-        DISQUS_API_NO_ACTION => t('No Action'),
-        DISQUS_API_CLOSE => t('Close Thread'),
-        DISQUS_API_REMOVE => t('Remove Thread'),
-      ),
-      '#states' => array(
-        'enabled' => array(
-          'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
-        ),
-      ),
-    );
-  }
+    if(\Drupal::moduleHandler()->moduleExists('libraries') && $library = libraries_detect('disqusapi')) {
+      if($library['installed']) {
+        $form['advanced']['api']['disqus_api_update'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Update Threads'),
+          '#description' => t('Update node titles and links via the disqus api when saving. (Requires your user access token.)'),
+          '#default_value' => $disqus_config->get('advanced.api.disqus_api_update'),
+          '#states' => array(
+            'enabled' => array(
+              'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
+            ),
+          ),
+        );
+        $form['advanced']['api']['disqus_api_delete'] = array(
+          '#type' => 'select',
+          '#title' => t('Close/Remove Threads'),
+          '#description' => t('Action to take when deleting a node. (Requires your user access token.)'),
+          '#default_value' => $disqus_config->get('advanced.api.disqus_api_delete'),
+          '#options' => array(
+            DISQUS_API_NO_ACTION => t('No Action'),
+            DISQUS_API_CLOSE => t('Close Thread'),
+            DISQUS_API_REMOVE => t('Remove Thread'),
+          ),
+          '#states' => array(
+            'enabled' => array(
+              'input[name="disqus_useraccesstoken"]' => array('empty' => FALSE),
+            ),
+          ),
+        );
+      }
+    }
     $form['advanced']['sso'] = array(
       '#weight' => 5,
       '#type' => 'fieldset',
