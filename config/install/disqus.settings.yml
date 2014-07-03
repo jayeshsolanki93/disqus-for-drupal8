@@ -1,8 +1,6 @@
 disqus_domain: ''
 visibility:
-  disqus_nodetypes: { }
-  disqus_location: 'content_area'
-  disqus_weight: '50'
+  disqus_blocks: false
 behavior:
   disqus_localization: false
   disqus_inherit_login: false

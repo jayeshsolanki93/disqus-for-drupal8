@@ -45,50 +45,11 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#title' => t('Visibility'),
       '#group' => 'settings',
     );
-    $types = node_type_get_types();
-    $options = array();
-    foreach ($types as $type) {
-      $options[$type->type] = $type->name;
-    }
-    $node_types = $disqus_config->get('visibility.disqus_nodetypes');
-    $form['visibility']['disqus_nodetypes'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Node Types'),
-      '#description' => t('Apply comments to only the following node types.'),
-      '#default_value' => !empty($node_types) ? $node_types : array(),
-      '#options' => $options,
-    );
-    $form['visibility']['disqus_location'] = array(
-      '#type' => 'select',
-      '#title' => t('Location'),
-      '#description' => t('Display the Disqus comments in the given location. When "Block" is selected, the comments will appear in the <a href="@disquscomments">Disqus Comments block</a>.', array('@disquscomments' => url('admin/structure/block'))),
-      '#default_value' => $disqus_config->get('visibility.disqus_location'),
-      '#options' => array(
-        'content_area' => t('Content Area'),
-        'block' => t('Block'),
-      ),
-    );
-    $form['visibility']['disqus_weight'] = array(
-      '#type' => 'select',
-      '#title' => t('Weight'),
-      '#description' => t('When the comments are displayed in the content area, you can change the position at which they will be shown.'),
-      '#default_value' => $disqus_config->get('visibility.disqus_weight'),
-      '#options' => array(
-        '-100' => '-100',
-        '-75' => '-75',
-        '-50' => '-50',
-        '-25' => '-25',
-        '0' => '0',
-        '25' => '25',
-        '50' => '50',
-        '75' => '75',
-        '100' => '100',
-      ),
-      '#states' => array(
-        'visible' => array(
-          'select[name="disqus_location"]' => array('value' => 'content_area'),
-        ),
-      ),
+    $form['visibility']['disqus_blocks'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Blocks'),
+      '#description' => t('When enabled Disqus comments will appear in the <a href="!block">Disqus Comments block</a>. You will first need to configure the disqus comment field for any entity sub-type. Learn more on the <a href="!help"> Disqus module help page</a>.', array('!block' => \Drupal::url('block.admin_display'), '!help' => \Drupal::url('help.page', array('name' => 'disqus')))),
+      '#default_value' => $disqus_config->get('visibility.disqus_blocks'),
     );
     // Behavior settings.
     $form['behavior'] = array(
@@ -242,9 +203,7 @@ class DisqusSettingsForm extends ConfigFormBase {
     $config = $this->config('disqus.settings');
     $config
       ->set('disqus_domain', $form_state['values']['disqus_domain'])
-      ->set('visibility.disqus_nodetypes', $form_state['values']['disqus_nodetypes'])
-      ->set('visibility.disqus_location', $form_state['values']['disqus_location'])
-      ->set('visibility.disqus_weight', $form_state['values']['disqus_weight'])
+      ->set('visibility.disqus_blocks', $form_state['values']['disqus_blocks'])
       ->set('behavior.disqus_localization', $form_state['values']['disqus_localization'])
       ->set('behavior.disqus_inherit_login', $form_state['values']['disqus_inherit_login'])
       ->set('behavior.disqus_developer', $form_state['values']['disqus_developer'])
