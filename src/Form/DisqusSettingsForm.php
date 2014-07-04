@@ -9,8 +9,41 @@ namespace Drupal\disqus\Form;
 
 use Drupal\Core\Form\ConfigFormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Extension\ModuleHandler;
 
 class DisqusSettingsForm extends ConfigFormBase {
+
+  /**
+   * The module handler.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandler
+   */
+  protected $moduleHandler;
+
+  /**
+   * Constructs a \Drupal\disqus\DisqusSettingsForm object.
+   *
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The factory for configuration objects.
+   * @param \Drupal\Core\Extension\ModuleHandler $module_handler
+   *   The module handler.
+   */
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandler $module_handler) {
+    parent::__construct($config_factory);
+    $this->moduleHandler = $module_handler;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('config.factory'),
+      $container->get('module_handler')
+    );
+  }
+
   /**
    * {@inheritdoc}
    */
@@ -111,7 +144,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
     );
-    if(\Drupal::moduleHandler()->moduleExists('libraries') && $library = libraries_detect('disqusapi')) {
+    if($this->moduleHandler->moduleExists('libraries') && $library = libraries_detect('disqusapi')) {
       if($library['installed']) {
         $form['advanced']['api']['disqus_api_update'] = array(
           '#type' => 'checkbox',
