@@ -11,15 +11,9 @@ disqus.settings:
       type: mapping
       label: 'Visibility'
       mapping:
-        disqus_nodetypes:
-          type: array
-          label: 'Node Types'
-        disqus_location:
-          type: string
-          label: 'Location'
-        disqus_weight:
-          type: string
-          label: 'Weight'
+        disqus_blocks:
+          type: boolean
+          label: 'Blocks'
     behavior:
       type: mapping
       label: "Behavior"
