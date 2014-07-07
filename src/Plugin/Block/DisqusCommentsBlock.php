@@ -52,7 +52,7 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
   public function build() {
     $disqus_config = \Drupal::config('disqus.settings');
 
-    if ($disqus_config->get('visibility.disqus_location') === 'block' && \Drupal::currentUser()->hasPermission('view disqus comments')) {
+    if ($disqus_config->get('visibility.disqus_blocks') && \Drupal::currentUser()->hasPermission('view disqus comments')) {
       if ($object = \Drupal::request()->attributes->get('node')) {
         return $this->buildForNodeEntity($object);
       }
@@ -67,15 +67,18 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
    * Build the disqus comment block for node entity.
    */
   protected function buildForNodeEntity($object) {
-    // For nodes, display if the Disqus object is enabled.
-    if (isset($object->disqus) && $object->disqus['status']) {
+    // For nodes, display if the Disqus field is enabled.
+    $field = \Drupal::service('disqus.manager')->getFields('node');
+    if(!$object->hasField(key($field))) {
+      return;
+    }
+    if ($object->get(key($field))->status) {
       return array(
         'disqus' => array(
           '#type' => 'disqus',
-          '#disqus' => $object->disqus,
           '#post_render_cache' => array(
             'disqus_element_post_render_cache' => array(
-              array('node' => $object->disqus),
+              array('entity' => $object),
             ),
           ),
           '#cache' => array(
@@ -92,14 +95,17 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
    * Build the disqus comment block for user entity.
    */
   protected function buildForUserEntity($object) {
-    if (isset($object->disqus)) {
+    $field = \Drupal::service('disqus.manager')->getFields('user');
+    if(!$object->hasField(key($field))) {
+      return;
+    }
+    if ($object->get(key($field))->status) {
       return array(
         'disqus' => array(
-          '#type' => 'disqus',
           '#disqus' => $object->disqus,
           '#post_render_cache' => array(
             'disqus_element_post_render_cache' => array(
-              array('node' => $object->disqus),
+              array('entity' => $object),
             ),
           ),
           '#cache' => array(
