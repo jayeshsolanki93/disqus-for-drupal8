@@ -1,6 +1,4 @@
 disqus_domain: ''
-visibility:
-  disqus_blocks: false
 behavior:
   disqus_localization: false
   disqus_inherit_login: false

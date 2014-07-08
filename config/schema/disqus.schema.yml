@@ -7,13 +7,6 @@ disqus.settings:
     disqus_domain:
       type: string
       label: 'Shortname'
-    visibility:
-      type: mapping
-      label: 'Visibility'
-      mapping:
-        disqus_blocks:
-          type: boolean
-          label: 'Blocks'
     behavior:
       type: mapping
       label: "Behavior"

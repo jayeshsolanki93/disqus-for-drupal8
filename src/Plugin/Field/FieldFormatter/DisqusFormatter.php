@@ -78,7 +78,7 @@ class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInt
   public function viewElements(FieldItemListInterface $items) {
     $element = array();
 
-    if(!\Drupal::config('disqus.settings')->get('visibility.disqus_blocks') && $items->status == 1 && $this->currentUser->hasPermission('view disqus comments')) {
+    if($items->status == 1 && $this->currentUser->hasPermission('view disqus comments')) {
       $element[] = array(
         '#type' => 'disqus',
         '#post_render_cache' => array(

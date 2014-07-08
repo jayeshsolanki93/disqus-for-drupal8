@@ -1,16 +1,64 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\disqus\Plugin\Block\DisqusBaseBlock.
+ */
+
 namespace Drupal\disqus\Plugin\Block;
 
 use Drupal\block\BlockBase;
+use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\Core\Session\AccountInterface;
 
-abstract class DisqusBaseBlock extends BlockBase {
+abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPluginInterface {
+
   /**
    * Overrides \Drupal\block\BlockBase::settings().
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
    */
-  public function settings() {
+  protected $currentUser;
+
+  /**
+   * Constructs a new DisqusBaseBlock.
+   *
+   * @param array $configuration
+   *   A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   *   The plugin ID for the plugin instance.
+   * @param mixed $plugin_definition
+   *   The plugin implementation definition.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The account for which view access should be checked.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition);
+    $this->currentUser = $current_user;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container, array $configuration, $plugin_id, $plugin_definition) {
+    return new static(
+      $configuration,
+      $plugin_id,
+      $plugin_definition,
+      $container->get('current_user')
+    );
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function defaultConfiguration() {
     return array(
-      'cache' => DRUPAL_CACHE_GLOBAL,
+      'cache' => array(
+        'max_age' => 0,
+      ),
     );
   }
 

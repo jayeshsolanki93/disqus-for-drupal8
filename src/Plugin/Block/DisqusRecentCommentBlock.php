@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\disqus\Plugin\Block\DisqusRecentCommentersBlock.
+ */
+
 namespace Drupal\disqus\Plugin\Block;
 
 use Drupal\block\Annotation\Block;

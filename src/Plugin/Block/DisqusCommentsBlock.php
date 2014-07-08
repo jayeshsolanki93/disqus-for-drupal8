@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains \Drupal\disqus\Plugin\Block\DisqusCommentsBlock.
+ */
+
 namespace Drupal\disqus\Plugin\Block;
 
 use Drupal\block\Annotation\Block;
@@ -16,13 +21,15 @@ use Drupal\Core\Annotation\Translation;
 class DisqusCommentsBlock extends DisqusBaseBlock {
   protected $id = 'disqus_comments';
 
-  /**
-   * Overrides DisqusBaseBlock::settings().
-   */
-  public function settings() {
-    return array(
-      'cache' => DRUPAL_CACHE_CUSTOM,
-    );
+   /**
+   * Overrides DisqusBaseBlock::defaultConfiguration().
+    */
+  public function defaultConfiguration() {
+     return array(
+      'cache' => array(
+        'max_age' => 0,
+      ),
+     );
   }
 
   /**
@@ -51,69 +58,35 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
    */
   public function build() {
     $disqus_config = \Drupal::config('disqus.settings');
-
-    if ($disqus_config->get('visibility.disqus_blocks') && \Drupal::currentUser()->hasPermission('view disqus comments')) {
-      if ($object = \Drupal::request()->attributes->get('node')) {
-        return $this->buildForNodeEntity($object);
+    if ($this->currentUser->hasPermission('view disqus comments')) {
+      $keys = \Drupal::request()->attributes->all();
+      foreach($keys as $key => $value) {
+        if(!(is_a($value,'Drupal\Core\Entity\ContentEntityInterface'))) {
+          continue;
+        }
+        // For nodes, display if the Disqus field is enabled.
+        $entity = \Drupal::request()->attributes->get($key);
+        $field = \Drupal::service('disqus.manager')->getFields($key);
+        if($entity->hasField(key($field))) {
+          if ($entity->get(key($field))->status) {
+            return array(
+              'disqus' => array(
+                '#type' => 'disqus',
+                '#post_render_cache' => array(
+                  'disqus_element_post_render_cache' => array(
+                    array('entity' => $entity),
+                  ),
+                ),
+                '#cache' => array(
+                  'bin' => 'render',
+                  'keys' => array('disqus', 'disqus_comments', "{$entity->getEntityTypeId()}", $entity->id()),
+                  'tags' => array('content' => TRUE),
+                ),
+              ),
+            );
+          }
+        }
       }
-
-      if ($object = \Drupal::request()->attributes->get('user')) {
-        return  $this->buildForUserEntity($object);
-      }
-    }
-  }
-
-  /**
-   * Build the disqus comment block for node entity.
-   */
-  protected function buildForNodeEntity($object) {
-    // For nodes, display if the Disqus field is enabled.
-    $field = \Drupal::service('disqus.manager')->getFields('node');
-    if(!$object->hasField(key($field))) {
-      return;
-    }
-    if ($object->get(key($field))->status) {
-      return array(
-        'disqus' => array(
-          '#type' => 'disqus',
-          '#post_render_cache' => array(
-            'disqus_element_post_render_cache' => array(
-              array('entity' => $object),
-            ),
-          ),
-          '#cache' => array(
-            'bin' => 'render',
-            'keys' => array('disqus', 'disqus_comments', 'node', $object->id()),
-            'tags' => array('content' => TRUE),
-          ),
-        ),
-      );
-    }
-  }
-
-  /**
-   * Build the disqus comment block for user entity.
-   */
-  protected function buildForUserEntity($object) {
-    $field = \Drupal::service('disqus.manager')->getFields('user');
-    if(!$object->hasField(key($field))) {
-      return;
-    }
-    if ($object->get(key($field))->status) {
-      return array(
-        'disqus' => array(
-          '#disqus' => $object->disqus,
-          '#post_render_cache' => array(
-            'disqus_element_post_render_cache' => array(
-              array('entity' => $object),
-            ),
-          ),
-          '#cache' => array(
-            'bin' => 'render',
-            'keys' => array('disqus', 'disqus_comments', 'user', $object->id()),
-          ),
-        ),
-      );
     }
   }
 }
