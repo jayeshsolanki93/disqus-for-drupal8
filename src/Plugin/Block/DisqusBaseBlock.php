@@ -11,17 +11,31 @@ use Drupal\block\BlockBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\disqus\DisqusCommentManager;
+use Symfony\Component\HttpFoundation\Request;
 
 abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
   /**
-   * Overrides \Drupal\block\BlockBase::settings().
    * The current user.
    *
    * @var \Drupal\Core\Session\AccountInterface
    */
   protected $currentUser;
 
+  /**
+   * Disqus comment manager object.
+   *
+   * @var \Drupal\disqus\DisqusCommentManager
+   */
+  protected $disqusManager;
+
+  /**
+   * The request object.
+   *
+   * @ var \Symfony\Component\HttpFoundation\Request
+   */
+  protected $request;
   /**
    * Constructs a new DisqusBaseBlock.
    *
@@ -34,9 +48,11 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The account for which view access should be checked.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request, DisqusCommentManager $disqus_manager, AccountInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->currentUser = $current_user;
+    $this->disqusManager = $disqus_manager;
+    $this->request = $request;
   }
 
   /**
@@ -47,6 +63,8 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
       $configuration,
       $plugin_id,
       $plugin_definition,
+      $container->get('request'),
+      $container->get('disqus.manager'),
       $container->get('current_user')
     );
   }
