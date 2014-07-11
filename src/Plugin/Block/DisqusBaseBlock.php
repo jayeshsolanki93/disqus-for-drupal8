@@ -75,7 +75,8 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
   public function defaultConfiguration() {
     return array(
       'cache' => array(
-        'max_age' => 0,
+        'max_age' => 3600,
+        'contexts' => array(),
       ),
     );
   }

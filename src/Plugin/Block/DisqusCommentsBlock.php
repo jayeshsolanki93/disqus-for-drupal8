@@ -21,17 +21,6 @@ use Drupal\Core\Annotation\Translation;
 class DisqusCommentsBlock extends DisqusBaseBlock {
   protected $id = 'disqus_comments';
 
-   /**
-   * Overrides DisqusBaseBlock::defaultConfiguration().
-    */
-  public function defaultConfiguration() {
-     return array(
-      'cache' => array(
-        'max_age' => 0,
-      ),
-     );
-  }
-
   /**
    * Overrides DisqusBaseBlock::blockForm().
    */
