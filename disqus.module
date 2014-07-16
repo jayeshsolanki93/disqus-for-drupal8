@@ -5,27 +5,27 @@
  * The Disqus Drupal module.
  */
 
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 /**
- * API No action on node delete.
+ * API No action on entity delete.
  */
 define('DISQUS_API_NO_ACTION', 0);
 
 /**
- * API Close on node delete.
+ * API Close on entity delete.
  */
 define('DISQUS_API_CLOSE', 1);
 
 /**
- * API Remove on node delete.
+ * API Remove on entity delete.
  */
 define('DISQUS_API_REMOVE', 2);
 
 /**
  * Implements hook_help().
  */
-function disqus_help($route_name, Request $request) {
+function disqus_help($route_name, RouteMatchInterface $route_match) {
   switch ($route_name) {
     case 'help.page.disqus':
       $output = '<p>'. t('Uses the <a href="!disqus">Disqus</a> comment system to enhance comments.', array('!disqus' => 'http://disqus.com')) .'</p>';
@@ -85,11 +85,10 @@ function disqus_element_post_render_cache(array $element, array $context) {
   $entity = $context['entity'];
   $disqus = array(
     'domain' => \Drupal::config('disqus.settings')->get('disqus_domain'),
-    'url' => $entity->url(),
+    'url' => $entity->url('canonical',array('absolute' => TRUE)),
     'title' => $entity->label(),
     'identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}",
   );
-
   $disqus['developer'] = \Drupal::config('disqus.settings')->get('behavior.disqus_developer');
 
   // If the user is logged in, we can inject the username and email for Disqus.
@@ -187,41 +186,50 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
 }
 
 /**
- * Implements hook_node_delete().
+ * Implements hook_entity_delete().
  */
-function disqus_node_delete($node) {
-  db_delete('disqus')->condition('nid', $node->id())->execute();
+function disqus_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
+  // Only act on content entities.
+  if(!($entity instanceof Drupal\Core\Entity\ContentEntityInterface)) {
+    return;
+  }
 
+  $field = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
+  if(!$entity->hasField(key($field))) {
+      return;
+  }
+
+  $config = \Drupal::config('disqus.settings');
   // Close/remove the thread on disqus if required.
-  $action = \Drupal::config('disqus.settings')->get('advanced.api.disqus_api_delete');
+  $action = $config->get('advanced.api.disqus_api_delete');
   if ($action != DISQUS_API_NO_ACTION) {
     $disqus = disqus_api();
     if ($disqus) {
       try {
         // Load the thread data from disqus. Passing thread is required to allow the thread:ident call to work correctly. There is a pull request to fix this issue.
-        $thread = $disqus->threads->details(array('forum' => $node->disqus['domain'], 'thread:ident' => $node->disqus['identifier'], 'thread' => '1', 'version' => '3.0'));
+        $thread = $disqus->threads->details(array('forum' => $config->get('disqus_domain'), 'thread:ident' => "{$entity->getEntityTypeId()}/{$entity->id()}", 'thread' => '1'));
       }
       catch (Exception $exception) {
         drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
-        watchdog('disqus', 'Error loading thread details for node @nid. Check your API keys.', array('@nid' => $node->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        watchdog('disqus', 'Error loading thread details for entity @id. Check your API keys.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
       }
       if (isset($thread->id)) {
         if ($action == DISQUS_API_CLOSE) {
           try {
-            $disqus->threads->close(array('access_token' => \Drupal::config('disqus.settings')->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'version' => '3.0'));
+            $disqus->threads->close(array('access_token' => $config->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $config->get('disqus_domain')));
           }
           catch (Exception $exception) {
             drupal_set_message(t('There was an error closing the thread on Disqus.'), 'error');
-            watchdog('disqus', 'Error closing thread for node @nid. Check your user access token.', array('@nid' => $node->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+            watchdog('disqus', 'Error closing thread for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
           }
         }
         if ($action == DISQUS_API_REMOVE) {
           try {
-            $disqus->threads->remove(array('access_token' => \Drupal::config('disqus.settings')->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'version' => '3.0'));
+            $disqus->threads->remove(array('access_token' => $config->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $config->get('disqus_domain')));
           }
           catch (Exception $exception) {
             drupal_set_message(t('There was an error removing the thread on Disqus.'), 'error');
-            watchdog('disqus', 'Error removing thread for node @nid. Check your user access token.', array('@nid' => $node->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+            watchdog('disqus', 'Error removing thread for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
           }
         }
       }
@@ -230,54 +238,41 @@ function disqus_node_delete($node) {
 }
 
 /**
- * Implements hook_node_insert().
+ * Implements hook_entity_update().
  */
-function disqus_node_insert($node) {
-  // Write the value only if it's disabled (default is enabled).
-  if (isset($node->disqus_status) && $node->disqus_status == FALSE) {
-    $data = array(
-      'nid' => $node->id(),
-      'status' => $node->disqus_status,
-    );
-    drupal_write_record('disqus', $data);
+function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
+  // Only act on content entities.
+  if(!($entity instanceof Drupal\Core\Entity\ContentEntityInterface)) {
+    return;
   }
-}
 
-/**
- * Implements hook_node_update().
- */
-function disqus_node_update($node) {
+  $field = \Drupal::service('disqus.manager')->getFields($entity->getEntityTypeId());
+  if(!$entity->hasField(key($field))) {
+      return;
+  }
+
+  $config = \Drupal::config('disqus.settings');
   // Update the thread information on disqus if required.
-  if (\Drupal::config('disqus.settings')->get('advanced.api.disqus_api_update') && ($node->disqus['title'] != $node->original->disqus['title'] || $node->disqus['url'] != $node->original->disqus['url'])) {
+  if ($config->get('advanced.api.disqus_api_update') && ($entity->label() != $entity->original->label() || $entity->url() != $entity->original->url())) {
     $disqus = disqus_api();
     if ($disqus) {
       try {
         // Load the thread data from disqus. Passing thread is required to allow the thread:ident call to work correctly. There is a pull request to fix this issue.
-        $thread = $disqus->threads->details(array('forum' => $node->disqus['domain'], 'thread:ident' => $node->disqus['identifier'], 'thread' => '1', 'version' => '3.0'));
+        $thread = $disqus->threads->details(array('forum' => $config->get('disqus_domain'), 'thread:ident' => "{$entity->getEntityTypeId()}/{$entity->id()}", 'thread' => '1'));
       }
       catch (Exception $exception) {
         drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
-        watchdog('disqus', 'Error loading thread details for node @nid. Check your API keys.', array('@nid' => $node->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        watchdog('disqus', 'Error loading thread details for entity @id. Check your API keys.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
       }
       if (isset($thread->id)) {
         try {
-          $disqus->threads->update(array('access_token' => \Drupal::config('disqus.settings')->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'title' => $node->disqus['title'], 'url' => $node->disqus['url'], 'version' => '3.0'));
+          $disqus->threads->update(array('access_token' => $config->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $config->get('disqus_domain'), 'title' => $entity->label(), 'url' => $entity->url('canonical',array('absolute' => TRUE))));
         }
         catch (Exception $exception) {
           drupal_set_message(t('There was an error updating the thread details on Disqus.'), 'error');
-          watchdog('disqus', 'Error updating thread details for node @nid. Check your user access token.', array('@nid' => $node->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+          watchdog('disqus', 'Error updating thread details for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
         }
       }
-    }
-  }
-
-  // Finish the update process.
-  if (isset($node->disqus_status) && isset($node->disqus['status']) && $node->disqus_status != $node->disqus['status']) {
-    if ($node->disqus_status) {
-      disqus_node_delete($node);
-    }
-    else {
-      disqus_node_insert($node);
     }
   }
 }
