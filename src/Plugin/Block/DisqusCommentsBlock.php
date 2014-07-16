@@ -48,13 +48,13 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
   public function build() {
     $disqus_config = \Drupal::config('disqus.settings');
     if ($this->currentUser->hasPermission('view disqus comments')) {
-      $keys = $this->request->attributes->all();
+      $keys = $this->routeMatch->getParameters();
       foreach($keys as $key => $value) {
         if(!(is_a($value,'Drupal\Core\Entity\ContentEntityInterface'))) {
           continue;
         }
         // Display if the Disqus field is enabled for the entity.
-        $entity = $this->request->attributes->get($key);
+        $entity = $this->routeMatch->getParameter($key);
         $field = $this->disqusManager->getFields($key);
         if($entity->hasField(key($field))) {
           if ($entity->get(key($field))->status) {
