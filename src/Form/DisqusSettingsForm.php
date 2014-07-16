@@ -72,18 +72,6 @@ class DisqusSettingsForm extends ConfigFormBase {
       ),
       '#weight' => 50,
     );
-    // Visibility settings.
-    $form['visibility'] = array(
-      '#type' => 'details',
-      '#title' => t('Visibility'),
-      '#group' => 'settings',
-    );
-    $form['visibility']['disqus_blocks'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Blocks'),
-      '#description' => t('When enabled Disqus comments will appear in the <a href="!block">Disqus Comments block</a>. You will first need to configure the disqus comment field for any entity sub-type. Learn more on the <a href="!help"> Disqus module help page</a>.', array('!block' => \Drupal::url('block.admin_display'), '!help' => \Drupal::url('help.page', array('name' => 'disqus')))),
-      '#default_value' => $disqus_config->get('visibility.disqus_blocks'),
-    );
     // Behavior settings.
     $form['behavior'] = array(
       '#type' => 'details',
@@ -236,7 +224,6 @@ class DisqusSettingsForm extends ConfigFormBase {
     $config = $this->config('disqus.settings');
     $config
       ->set('disqus_domain', $form_state['values']['disqus_domain'])
-      ->set('visibility.disqus_blocks', $form_state['values']['disqus_blocks'])
       ->set('behavior.disqus_localization', $form_state['values']['disqus_localization'])
       ->set('behavior.disqus_inherit_login', $form_state['values']['disqus_inherit_login'])
       ->set('behavior.disqus_developer', $form_state['values']['disqus_developer'])
