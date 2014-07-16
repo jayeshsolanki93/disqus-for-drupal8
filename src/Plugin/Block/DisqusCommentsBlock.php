@@ -53,7 +53,7 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
         if(!(is_a($value,'Drupal\Core\Entity\ContentEntityInterface'))) {
           continue;
         }
-        // For nodes, display if the Disqus field is enabled.
+        // Display if the Disqus field is enabled for the entity.
         $entity = $this->request->attributes->get($key);
         $field = $this->disqusManager->getFields($key);
         if($entity->hasField(key($field))) {
