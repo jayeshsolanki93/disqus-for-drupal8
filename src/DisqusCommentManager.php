@@ -8,12 +8,20 @@
 namespace Drupal\disqus;
 
 use Drupal\Core\Entity\EntityManagerInterface;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Disqus comment manager contains common functions to manage disqus_comment fields.
  */
 class DisqusCommentManager implements DisqusCommentManagerInterface {
   
+  /**
+   * The current user.
+   *
+   * @var \Drupal\Core\Session\AccountInterface
+   */
+  protected $currentUser;
+
   /**
    * The entity manager service.
    *
@@ -27,10 +35,11 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    */
-  public function __construct(EntityManagerInterface $entity_manager) {
+  public function __construct(EntityManagerInterface $entity_manager, AccountInterface $current_user) {
     $this->entityManager = $entity_manager;
+    $this->currentUser = $current_user;
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -115,7 +124,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
    */
   public function disqus_sso_user_data() {
 
-    $account = \Drupal::currentUser();
+    $account = $this->currentUser;
 
     $data = array();
     if (!$account->isAnonymous()) {
