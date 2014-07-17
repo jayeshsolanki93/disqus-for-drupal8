@@ -349,22 +349,6 @@ function disqus_api() {
 }
 
 /**
- * Creates an instance of the Disqus PHP API.
- *
- * @param $user_api_key
- *   The User API Key.
- * @param $forum_api_key
- *   The Forum API key.
- *
- * @return
- *   The instance of the Disqus API.
- */
-function disqus($user_api_key = NULL, $forum_api_key = NULL) {
-  module_load_include('php', 'disqus', 'disqus');
-  return new \Drupal\disqus\Disqus($user_api_key, $forum_api_key);
-}
-
-/**
  * Implementation of hook_views_api().
  */
 function disqus_views_api() {
