@@ -63,7 +63,7 @@ class DisqusWidget extends WidgetBase implements ContainerFactoryPluginInterface
     $element['status'] = array(
       '#type' => 'checkbox',
       '#title' => t('Disqus Comments'),
-      '#description' => t('Users can post comments using <a href="@disqus">Disqus</a>.', array('@disqus' => 'http://disqus.com')),
+      '#description' => t('Users can post comments using <a href="!disqus">Disqus</a>.', array('!disqus' => 'http://disqus.com')),
       '#default_value' => isset($items->status) ? $items->status : TRUE,
       '#access' => $this->currentUser->hasPermission('toggle disqus comments'),
     );

@@ -101,9 +101,9 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#type' => 'details',
       '#title' => t('Advanced'),
       '#group' => 'settings',
-      '#description' => t('Use these settings to configure the more advanced uses of Disqus. You can find more information about these in the <a href="@applications">Applications</a> section of Disqus. To enable some of these features, you will require a <a href="@addons">Disqus Add-on Package</a>.', array(
-        '@applications' => 'http://disqus.com/api/applications/',
-        '@addons' => 'http://disqus.com/addons/',
+      '#description' => t('Use these settings to configure the more advanced uses of Disqus. You can find more information about these in the <a href="!applications">Applications</a> section of Disqus. To enable some of these features, you will require a <a href="!addons">Disqus Add-on Package</a>.', array(
+        '!applications' => 'http://disqus.com/api/applications/',
+        '!addons' => 'http://disqus.com/addons/',
       )),
     );
     $form['advanced']['disqus_useraccesstoken'] = array(
@@ -125,9 +125,9 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#weight' => 4,
       '#type' => 'fieldset',
       '#title' => t('Disqus API Settings'),
-      '#description' => t('These setting pertain to the official Disqus PHP API. You will need to install the <a href="@libraries">libraries module</a> and upload the <a href="@disqusapi">api files</a> to /sites/all/libraries/disqusapi to enable api functionality.', array(
-        '@libraries' => 'http://drupal.org/project/libraries',
-        '@disqusapi' => 'https://github.com/disqus/disqus-php',
+      '#description' => t('These setting pertain to the official Disqus PHP API. You will need to install the <a href="!libraries">libraries module</a> and upload the <a href="!disqusapi">api files</a> to /sites/all/libraries/disqusapi to enable api functionality.', array(
+        '!libraries' => 'http://drupal.org/project/libraries',
+        '!disqusapi' => 'https://github.com/disqus/disqus-php',
       )),
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
@@ -179,8 +179,8 @@ class DisqusSettingsForm extends ConfigFormBase {
     $form['advanced']['sso']['disqus_sso'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use Single Sign-On'),
-      '#description' => t('Provide <a href="@sso">Single Sign-On</a> access to your site.', array(
-        '@sso' => 'http://disqus.com/api/sso/',
+      '#description' => t('Provide <a href="!sso">Single Sign-On</a> access to your site.', array(
+        '!sso' => 'http://disqus.com/api/sso/',
       )),
       '#default_value' => $disqus_config->get('advanced.sso.disqus_sso'),
     );
@@ -209,11 +209,6 @@ class DisqusSettingsForm extends ConfigFormBase {
         ),
       ),
     );
-//    $form['actions'] = array('#type' => 'actions');
-//    $form['actions']['submit'] = array(
-//      '#type' => 'submit',
-//      '#value' => $this->t('Add'),
-//    );
     return parent::buildForm($form, $form_state);
   }
 

@@ -128,7 +128,6 @@ function disqus_element_post_render_cache(array $element, array $context) {
   if (!empty($element['#disqus']['callbacks'])) {
     $disqus['callbacks'] = $element['#disqus']['callbacks'];
   }
-drupal_set_message(var_dump($disqus));
   // Add the disqus.js and all the settings to process the JavaScript and load Disqus.
   $element['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
   $element['#attached']['js'][] = array(

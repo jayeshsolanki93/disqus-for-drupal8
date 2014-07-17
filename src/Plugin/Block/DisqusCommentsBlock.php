@@ -31,7 +31,7 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
       '#tree' => TRUE,
     );
 
-    $form['disqus']['#description'] = t('This block will be used to display the comments from Disqus when comments are applied to the given page. Visit the <a href="@disqussettings">Disqus settings</a> to configure when this is visible.', array('@disqussettings' => url('admin/config/services/disqus')));
+    $form['disqus']['#description'] = t('This block will be used to display the comments from Disqus. You will first need to configure the disqus comment field for any <a href="!entity-help">entity sub-type </a> (for example, a <a href="!content-type">content type</a>).', array('!entity-help' => \Drupal::url('help.page', array('name' => 'entity')), '!content-type' => \Drupal::url('node.overview_types'));
 
     return $form;
   }
