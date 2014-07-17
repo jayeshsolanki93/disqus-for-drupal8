@@ -2,7 +2,6 @@ disqus_domain: ''
 behavior:
   disqus_localization: false
   disqus_inherit_login: false
-  disqus_developer: false
 advanced:
   disqus_useraccesstoken: ''
   disqus_publickey: ''

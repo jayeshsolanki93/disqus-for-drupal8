@@ -89,7 +89,6 @@ function disqus_element_post_render_cache(array $element, array $context) {
     'title' => $entity->label(),
     'identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}",
   );
-  $disqus['developer'] = \Drupal::config('disqus.settings')->get('behavior.disqus_developer');
 
   // If the user is logged in, we can inject the username and email for Disqus.
   $account = \Drupal::currentUser();
