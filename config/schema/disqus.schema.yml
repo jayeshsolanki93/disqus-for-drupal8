@@ -17,9 +17,6 @@ disqus.settings:
         disqus_inherit_login:
           type: boolean
           label: 'Inherit User Credentials'
-        disqus_developer:
-          type: boolean
-          label: 'Testing'
     advanced:
       type: mapping
       label: 'Advanced'
