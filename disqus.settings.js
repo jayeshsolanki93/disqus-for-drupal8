@@ -38,7 +38,7 @@ Drupal.behaviors.disqusSettingsForm = {
         vals.push($('#edit-disqus-userapikey').parent().find('label').text());
       }
 
-      var checkboxes = ['#edit-disqus-localization', '#edit-disqus-inherit-login'];
+      var checkboxes = ['#edit-disqus-localization', '#edit-disqus-inherit-login', '#edit-disqus-disable-mobile'];
       for (var i in checkboxes) {
         if ($(checkboxes[i]).is(':checked')) {
           vals.push($(checkboxes[i]).parent().find('label').text());

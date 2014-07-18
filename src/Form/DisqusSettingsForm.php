@@ -90,6 +90,12 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#description' => t("When enabled and a user is logged in, the Disqus 'Post as Guest' login form will be pre-filled with the user's name and email address."),
       '#default_value' => $disqus_config->get('behavior.disqus_inherit_login'),
     );
+    $form['behavior']['disqus_disable_mobile'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Disable mobile optimized version'),
+      '#description' => t('When enabled, uses the <a href="http://docs.disqus.com/help/2/">disqus_disable_mobile</a> flag to tell Disqus service to never use the mobile optimized version of Disqus.'),
+      '#default_value' => $disqus_config->get('behavior.disqus_disable_mobile'),
+    );
     // Advanced settings.
     $form['advanced'] = array(
       '#type' => 'details',
@@ -215,6 +221,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('disqus_domain', $form_state['values']['disqus_domain'])
       ->set('behavior.disqus_localization', $form_state['values']['disqus_localization'])
       ->set('behavior.disqus_inherit_login', $form_state['values']['disqus_inherit_login'])
+      ->set('behavior.disqus_disable_mobile', $form_state['values']['disqus_disable_mobile'])
       ->set('advanced.disqus_useraccesstoken', $form_state['values']['disqus_useraccesstoken'])
       ->set('advanced.disqus_publickey', $form_state['values']['disqus_publickey'])
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])

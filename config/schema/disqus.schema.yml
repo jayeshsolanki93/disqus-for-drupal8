@@ -17,6 +17,9 @@ disqus.settings:
         disqus_inherit_login:
           type: boolean
           label: 'Inherit User Credentials'
+        disqus_disable_mobile:
+          type: boolean
+          label: 'Disable mobile optimized version'
     advanced:
       type: mapping
       label: 'Advanced'
