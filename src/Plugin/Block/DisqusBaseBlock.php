@@ -12,7 +12,7 @@ use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\disqus\DisqusCommentManager;
-use Symfony\Component\HttpFoundation\Request;
+use Drupal\Core\Routing\RouteMatchInterface;
 
 abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -31,11 +31,12 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
   protected $disqusManager;
 
   /**
-   * The request object.
+   * The current route match.
    *
-   * @ var \Symfony\Component\HttpFoundation\Request
+   * @var \Drupal\Core\Routing\RouteMatchInterface
    */
-  protected $request;
+  protected $routeMatch;
+
   /**
    * Constructs a new DisqusBaseBlock.
    *
@@ -45,14 +46,18 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
    *   The plugin ID for the plugin instance.
    * @param mixed $plugin_definition
    *   The plugin implementation definition.
+   * @param \Drupal\Core\Routing\RouteMatchInterface $route_match
+   *   The current route match.
+   * @param \Drupal\disqus\DisqusCommentManager $disqusManager
+   *   The disqus comment manager object.
    * @param \Drupal\Core\Session\AccountInterface $current_user
    *   The account for which view access should be checked.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, Request $request, DisqusCommentManager $disqus_manager, AccountInterface $current_user) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, RouteMatchInterface $route_match, DisqusCommentManager $disqus_manager, AccountInterface $current_user) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->currentUser = $current_user;
     $this->disqusManager = $disqus_manager;
-    $this->request = $request;
+    $this->routeMatch = $route_match;
   }
 
   /**
@@ -63,7 +68,7 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('request'),
+      $container->get('current_route_match'),
       $container->get('disqus.manager'),
       $container->get('current_user')
     );
