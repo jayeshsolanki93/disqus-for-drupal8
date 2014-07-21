@@ -210,7 +210,7 @@ function disqus_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
       }
       catch (Exception $exception) {
         drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
-        watchdog('disqus', 'Error loading thread details for entity @id. Check your API keys.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        \Drupal::logger('disqus')->error('Error loading thread details for entity : !identifier. Check your API keys.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
       }
       if (isset($thread->id)) {
         if ($action == DISQUS_API_CLOSE) {
@@ -219,7 +219,7 @@ function disqus_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
           }
           catch (Exception $exception) {
             drupal_set_message(t('There was an error closing the thread on Disqus.'), 'error');
-            watchdog('disqus', 'Error closing thread for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+            \Drupal::logger('disqus')->error('Error closing thread for entity : !identifier. Check your user access token.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
           }
         }
         if ($action == DISQUS_API_REMOVE) {
@@ -228,7 +228,7 @@ function disqus_entity_delete(Drupal\Core\Entity\EntityInterface $entity) {
           }
           catch (Exception $exception) {
             drupal_set_message(t('There was an error removing the thread on Disqus.'), 'error');
-            watchdog('disqus', 'Error removing thread for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+            \Drupal::logger('disqus')->error('Error closing thread for entity : !identifier. Check your user access token.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
           }
         }
       }
@@ -261,7 +261,7 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
       }
       catch (Exception $exception) {
         drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
-        watchdog('disqus', 'Error loading thread details for entity @id. Check your API keys.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        \Drupal::logger('disqus')->error('Error loading thread details for entity : !identifier. Check your API keys.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
       }
       if (isset($thread->id)) {
         try {
@@ -269,7 +269,7 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
         }
         catch (Exception $exception) {
           drupal_set_message(t('There was an error updating the thread details on Disqus.'), 'error');
-          watchdog('disqus', 'Error updating thread details for entity @id. Check your user access token.', array('@id' => $entity->id()), WATCHDOG_ERROR, 'admin/config/services/disqus');
+          \Drupal::logger('disqus')->error('Error updating thread details for entity : !identifier. Check your user access token.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
         }
       }
     }
