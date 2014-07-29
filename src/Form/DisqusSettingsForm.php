@@ -125,7 +125,7 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#weight' => 4,
       '#type' => 'fieldset',
       '#title' => t('Disqus API Settings'),
-      '#description' => t('These setting pertain to the official Disqus PHP API. You will need to install the <a href="!composer-manager">composer-manager module</a> and run the composer-manager\'s install command to download the api files and enable api functionality. Check the <a href="!disqus">disqus module</a> project page for more information.', array(
+      '#description' => t('These setting pertain to the official Disqus PHP API. You will need to install the <a href="!composer-manager">Composer Manager module</a> and run the composer-manager\'s install command to download the api files and enable api functionality. Check the <a href="!disqus">Disqus module</a> project page for more information.', array(
         '!composer-manager' => 'https://www.drupal.org/project/composer_manager',
         '!disqus' => 'https://www.drupal.org/project/disqus',
       )),
