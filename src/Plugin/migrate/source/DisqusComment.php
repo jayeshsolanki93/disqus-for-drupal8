@@ -9,6 +9,7 @@ namespace Drupal\disqus\Plugin\migrate\source;
 
 use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Row;
+use Drupal\user\Entity\User;
 
 /**
  * Disqus comment source using disqus-api.
@@ -86,7 +87,7 @@ class DisqusComment extends SourcePluginBase {
           $items[$id]['email'] = $post['author']['email'];
           $items[$id]['user_id'] = $post['author']['id'];
           $items[$id]['url'] = $post['author']['url'];
-          $items[$id]['ipAddress'] = $post['author']['ipAddress'];
+          $items[$id]['ipAddress'] = $post['ipAddress'];
           $items[$id]['isAnonymous'] = $post['author']['isAnonymous'];
           $items[$id]['createdAt'] = $post['createdAt'];
           $items[$id]['comment'] = $post['message'];
@@ -102,6 +103,14 @@ class DisqusComment extends SourcePluginBase {
    * {@inheritdoc}
    */
   public function prepareRow(Row $row) {
+    $row->setSourceProperty('uid', 0);
+    $email = $row->getSourceProperty('email');
+    $users = User::loadMultiple();
+    foreach($users as $uid => $user) {
+      if($user->getEmail() == $email) {
+        $row->setSourceProperty('uid', $uid);
+      }
+    }
     return parent::prepareRow($row);
   }
 

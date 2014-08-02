@@ -6,7 +6,6 @@ source:
     field_name: disqus
     comment_type: comment_no_subject
     comment_body/format: filtered_html
-    uid: 0
     thread: 0
 process:
   cid: id
@@ -15,7 +14,7 @@ process:
   entity_type: entity_type
   field_name: constants/field_name
   comment_type: constants/comment_no_subject
-  uid: constants/uid     #Remove constant value and compare email address with Drupal users email to get uid
+  uid: uid
   name: name
   mail: email
   homepage: url
