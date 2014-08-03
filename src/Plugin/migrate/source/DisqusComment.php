@@ -1,4 +1,4 @@
-<?
+<?php
 
 /**
  * @file
@@ -23,9 +23,16 @@ class DisqusComment extends SourcePluginBase {
   /**
    * Iterator.
    *
-   * @var \IteratorIterator
+   * @var \ArrayIterator
    */
   protected $iterator;
+
+  /**
+   * Array of user objects indexed by their uids.
+   *
+   * @var \Drupal\user\Entity\User::loadMultiple()
+   */
+  protected static $users;
 
   /**
    * {@inheritdoc}
@@ -44,16 +51,16 @@ class DisqusComment extends SourcePluginBase {
       'pid' => $this->t('Parent comment ID. If set to null, this comment is not a reply to an existing comment.'),
       'entity_id' => $this->t('The entity to which this comment is a reply.'),
       'entity_type' => $this->t('The entity-type of the entity on which this comment is a reply.'),
-      'name' => $this->("The comment author's name."),
-      'user_id' => $this->('The disqus user-id of the author who commented.'),
-      'email' => $this->("The comment author's email address."),
+      'name' => $this->t("The comment author's name."),
+      'user_id' => $this->t('The disqus user-id of the author who commented.'),
+      'email' => $this->t("The comment author's email address."),
       'url' => $this->t("The author's home page address	."),
       'ipAddress' => $this->t("The author's IP address."),
-      'isAnonymous' => $this->('If false, this comments has been posted by an anonymous user.'),
+      'isAnonymous' => $this->t('If false, this comments has been posted by an anonymous user.'),
       'isApproved' => $this->t('If the comment is approved or not.'),
       'createdAt' => $this->t('The time that the comment was created.'),
       'comment' => $this->t('The comment body.'),
-      'isEdited' => $this->('Boolean value indicating if the comment has been edited or not.'),
+      'isEdited' => $this->t('Boolean value indicating if the comment has been edited or not.'),
     );
   }
 
@@ -105,7 +112,9 @@ class DisqusComment extends SourcePluginBase {
   public function prepareRow(Row $row) {
     $row->setSourceProperty('uid', 0);
     $email = $row->getSourceProperty('email');
-    $users = User::loadMultiple();
+    if(!isset(static::$users)) {
+      $users = User::loadMultiple();
+    }
     foreach($users as $uid => $user) {
       if($user->getEmail() == $email) {
         $row->setSourceProperty('uid', $uid);
@@ -114,15 +123,15 @@ class DisqusComment extends SourcePluginBase {
     return parent::prepareRow($row);
   }
 
- /**
-  * Creates an instance of the Disqus PHP API.
-  *
-  * @return
-  *   The instance of the Disqus API.
-  */
+  /**
+   * Creates an instance of the Disqus PHP API.
+   *
+   * @return
+   *   The instance of the Disqus API.
+   */
   public function disqus_api() {
     try {
-    $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
+      $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
     }
     catch (Exception $exception) {
       drupal_set_message(t('There was an error loading the Disqus PHP API. Please check your API keys and try again.'), 'error');
