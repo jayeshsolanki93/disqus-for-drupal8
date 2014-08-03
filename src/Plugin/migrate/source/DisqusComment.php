@@ -39,7 +39,7 @@ class DisqusComment extends SourcePluginBase {
    */
   public function getIds() {
     $ids['id']['type'] = 'int';
-    return array();
+    return $ids;
   }
 
   /**
