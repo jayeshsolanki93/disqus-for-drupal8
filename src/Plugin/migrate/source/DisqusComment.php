@@ -72,10 +72,10 @@ class DisqusComment extends SourcePluginBase {
       $disqus = disqus_api();
       if ($disqus) {
         try {
-          $posts = $disqus->forums->listPosts(array('forum' => $config->get('disqus_domain'));
+          $posts = $disqus->forums->listPosts(array('forum' => \Drupal::config('disqus.settings')->get('disqus_domain')));
         }
         catch (Exception $exception) {
-          drupal_set_message(t('There was an error loading the forum details. Please check you API keys and try again.', 'error');
+          drupal_set_message(t('There was an error loading the forum details. Please check you API keys and try again.', 'error'));
           \Drupal::logger('disqus')->error('Error loading the Disqus PHP API. Check your forum name.', array());
           return FALSE;
         }
@@ -87,7 +87,7 @@ class DisqusComment extends SourcePluginBase {
           $items[$id]['pid'] = $post['parent'];
           $thread = $disqus->threads->details(array('thread' => $post['thread']));
           $identifier = $thread['identifier'];
-          $id_parts = explode("/", $thread['identifier'];
+          $id_parts = explode("/", $thread['identifier']);
           $items[$id]['entity_type'] = $id_parts[0];
           $items[$id]['entity_id'] = $id_parts[1];
           $items[$id]['name'] = $post['author']['name'];
