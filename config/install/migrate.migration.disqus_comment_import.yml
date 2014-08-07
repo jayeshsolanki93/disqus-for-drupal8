@@ -1,7 +1,7 @@
 id: disqus_comment_import
 label : Import Disqus comments
 source:
-  plugin: disqus_comment_source
+  plugin: disqus_source
   constants:
     field_name: disqus
     comment_type: comment_no_subject

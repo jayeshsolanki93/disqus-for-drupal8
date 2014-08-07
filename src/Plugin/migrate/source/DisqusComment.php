@@ -10,12 +10,15 @@ namespace Drupal\disqus\Plugin\migrate\source;
 use Drupal\migrate\Plugin\migrate\source\SourcePluginBase;
 use Drupal\migrate\Row;
 use Drupal\user\Entity\User;
+use Drupal\migrate\Entity\MigrationInterface;
+use Psr\Log\LoggerInterface;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Disqus comment source using disqus-api.
  *
  * @MigrateSource(
- *   id = "disqus_comment_source"
+ *   id = "disqus_source"
  * )
  */
 class DisqusComment extends SourcePluginBase {
@@ -28,11 +31,50 @@ class DisqusComment extends SourcePluginBase {
   protected $iterator;
 
   /**
-   * Array of user objects indexed by their uids.
+   * A logger instance.
    *
-   * @var \Drupal\user\Entity\User::loadMultiple()
+   * @var \Psr\Log\LoggerInterface
    */
-  protected static $users;
+  protected $logger;
+
+  /**
+   * The disqus.settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
+   * Constructs Disqus comments destination plugin.
+   *
+   * @param array $configuration
+   * A configuration array containing information about the plugin instance.
+   * @param string $plugin_id
+   * The plugin_id for the plugin instance.
+   * @param mixed $plugin_definition
+   * The plugin implemetation definition.
+   * @param \Drupal\migrate\Entity\MigrationInterface $migration
+   * The migration.
+   * @param \Psr\Log\LoggerInterface $logger
+   * A logger instance.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   * The config factory.
+   */
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, LoggerInterface $logger, ConfigFactoryInterface $config_factory) {
+    parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
+ $this->logger = $logger;
+ $this->config = $config_factory->get('disqus.settings');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function create(ContainerInterface $container) {
+    return new static(
+      $container->get('logger.factory')->get('disqus'),
+      $container->get('config.factory')
+    );
+  }
 
   /**
    * {@inheritdoc}
@@ -49,14 +91,14 @@ class DisqusComment extends SourcePluginBase {
     return array(
       'id' => $this->t('Comment ID.'),
       'pid' => $this->t('Parent comment ID. If set to null, this comment is not a reply to an existing comment.'),
-      'entity_id' => $this->t('The entity to which this comment is a reply.'),
-      'entity_type' => $this->t('The entity-type of the entity on which this comment is a reply.'),
+      'entity_id' => $this->t('The entity to which this comment belongs.'),
+      'entity_type' => $this->t('The entity-type of the entity on which this comment belongs.'),
       'name' => $this->t("The comment author's name."),
       'user_id' => $this->t('The disqus user-id of the author who commented.'),
       'email' => $this->t("The comment author's email address."),
       'url' => $this->t("The author's home page address	."),
       'ipAddress' => $this->t("The author's IP address."),
-      'isAnonymous' => $this->t('If false, this comments has been posted by an anonymous user.'),
+      'isAnonymous' => $this->t('If true, this comments has been posted by an anonymous user.'),
       'isApproved' => $this->t('If the comment is approved or not.'),
       'createdAt' => $this->t('The time that the comment was created.'),
       'comment' => $this->t('The comment body.'),
@@ -72,11 +114,11 @@ class DisqusComment extends SourcePluginBase {
       $disqus = disqus_api();
       if ($disqus) {
         try {
-          $posts = $disqus->forums->listPosts(array('forum' => \Drupal::config('disqus.settings')->get('disqus_domain')));
+          $posts = $disqus->forums->listPosts(array('forum' => $this->config->get('disqus_domain')));
         }
         catch (Exception $exception) {
           drupal_set_message(t('There was an error loading the forum details. Please check you API keys and try again.', 'error'));
-          \Drupal::logger('disqus')->error('Error loading the Disqus PHP API. Check your forum name.', array());
+          $this->logger->error('Error loading the Disqus PHP API. Check your forum name.', array());
           return FALSE;
         }
         
@@ -112,33 +154,12 @@ class DisqusComment extends SourcePluginBase {
   public function prepareRow(Row $row) {
     $row->setSourceProperty('uid', 0);
     $email = $row->getSourceProperty('email');
-    if(!isset(static::$users)) {
-      $users = User::loadMultiple();
-    }
-    foreach($users as $uid => $user) {
-      if($user->getEmail() == $email) {
-        $row->setSourceProperty('uid', $uid);
-      }
+    $entity_query = \Drupal::entityQuery('user');
+    $user = $entity_query->condition('mail', $email)->execute();
+    if($user) {
+      $row->setSourceProperty('uid', key($user));
     }
     return parent::prepareRow($row);
-  }
-
-  /**
-   * Creates an instance of the Disqus PHP API.
-   *
-   * @return
-   *   The instance of the Disqus API.
-   */
-  public function disqus_api() {
-    try {
-      $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
-    }
-    catch (Exception $exception) {
-      drupal_set_message(t('There was an error loading the Disqus PHP API. Please check your API keys and try again.'), 'error');
-      \Drupal::logger('disqus')->error('Error loading the Disqus PHP API. Check your API keys.', array());
-      return FALSE;
-    }
-    return $disqus;
   }
 }
 
