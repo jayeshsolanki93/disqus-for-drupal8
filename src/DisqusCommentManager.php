@@ -9,6 +9,7 @@ namespace Drupal\disqus;
 
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 
 /**
  * Disqus comment manager contains common functions to manage disqus_comment fields.
@@ -29,15 +30,28 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
    */
   protected $entityManager;
   
+
+  /**
+   * The module handler service.
+   *
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
   /**
    * Constructs the DisqusCommentManager object.
    * 
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
+   * @param \Drupal\Core\Session\AccountInterface $current_user
+   *   The current user.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $module_handler
+   *   A module handler.
    */
-  public function __construct(EntityManagerInterface $entity_manager, AccountInterface $current_user) {
+  public function __construct(EntityManagerInterface $entity_manager, AccountInterface $current_user, ModuleHandlerInterface $module_handler) {
     $this->entityManager = $entity_manager;
     $this->currentUser = $current_user;
+    $this->moduleHandler = $module_handler;
   }
 
   /**
@@ -147,7 +161,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
         $data['avatar'] = file_create_url($data['avatar']);
       }
     }
-    drupal_alter('disqus_user_data', $data);
+    $this->moduleHandler->alter('disqus_user_data', $data);
 
     return $data;
   }
