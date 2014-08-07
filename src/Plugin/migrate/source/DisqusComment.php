@@ -13,6 +13,7 @@ use Drupal\user\Entity\User;
 use Drupal\migrate\Entity\MigrationInterface;
 use Psr\Log\LoggerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
+use Drupal\Core\Entity\Query\QueryFactory;
 
 /**
  * Disqus comment source using disqus-api.
@@ -45,25 +46,35 @@ class DisqusComment extends SourcePluginBase {
   protected $config;
 
   /**
+   * The entity query factory.
+   *
+   * @var \Drupal\Core\Entity\Query\QueryFactory
+   */
+  protected $entityQuery;
+
+  /**
    * Constructs Disqus comments destination plugin.
    *
    * @param array $configuration
-   * A configuration array containing information about the plugin instance.
+   *   A configuration array containing information about the plugin instance.
    * @param string $plugin_id
-   * The plugin_id for the plugin instance.
+   *   The plugin_id for the plugin instance.
    * @param mixed $plugin_definition
-   * The plugin implemetation definition.
+   *   The plugin implemetation definition.
    * @param \Drupal\migrate\Entity\MigrationInterface $migration
-   * The migration.
+   *   The migration.
    * @param \Psr\Log\LoggerInterface $logger
-   * A logger instance.
+   *   A logger instance.
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
-   * The config factory.
+   *   The config factory.
+   * @param \Drupal\Core\Entity\Query\QueryFactory
+   *   The entity query factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, LoggerInterface $logger, ConfigFactoryInterface $config_factory) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, MigrationInterface $migration, LoggerInterface $logger, ConfigFactoryInterface $config_factory, QueryFactory $entity_query) {
     parent::__construct($configuration, $plugin_id, $plugin_definition, $migration);
- $this->logger = $logger;
- $this->config = $config_factory->get('disqus.settings');
+    $this->logger = $logger;
+    $this->config = $config_factory->get('disqus.settings');
+    $this->entityQuery = $entity_query;
   }
 
   /**
@@ -72,7 +83,8 @@ class DisqusComment extends SourcePluginBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('logger.factory')->get('disqus'),
-      $container->get('config.factory')
+      $container->get('config.factory'),
+      $container->get('entity.query')
     );
   }
 
@@ -154,8 +166,7 @@ class DisqusComment extends SourcePluginBase {
   public function prepareRow(Row $row) {
     $row->setSourceProperty('uid', 0);
     $email = $row->getSourceProperty('email');
-    $entity_query = \Drupal::entityQuery('user');
-    $user = $entity_query->condition('mail', $email)->execute();
+    $user = $this->entityQuery->get('user')->condition('mail', $email)->execute();
     if($user) {
       $row->setSourceProperty('uid', key($user));
     }
