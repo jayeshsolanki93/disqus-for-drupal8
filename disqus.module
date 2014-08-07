@@ -333,18 +333,15 @@ function theme_disqus_noscript($variables = array()) {
  *   The instance of the Disqus API.
  */
 function disqus_api() {
-  if (\Drupal::moduleHandler()->moduleExists('libraries') && ($library = libraries_load('disqusapi')) && !empty($library['loaded'])) {
-    try {
-      $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
-    }
-    catch (Exception $exception) {
-      drupal_set_message(t('There was an error loading the Disqus PHP API. Please check your API keys and try again.'), 'error');
-      watchdog('disqus', 'Error loading the Disqus PHP API. Check your API keys.', array(), WATCHDOG_ERROR, 'admin/config/services/disqus');
-      return FALSE;
-    }
-    return $disqus;
+  try {
+    $disqus = new DisqusAPI(\Drupal::config('disqus.settings')->get('advanced.disqus_secretkey'));
   }
-  return FALSE;
+  catch (Exception $exception) {
+    drupal_set_message(t('There was an error loading the Disqus PHP API. Please check your API keys and try again.'), 'error');
+    \Drupal::logger('disqus')->error('Error loading the Disqus PHP API. Check your API keys.', array());
+    return FALSE;
+  }
+  return $disqus;
 }
 
 /**

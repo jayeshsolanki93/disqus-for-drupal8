@@ -1,6 +1,6 @@
-README for Disqus for Drupal 7
+README for Disqus for Drupal 8
 
-Disqus 7.x-1.x
+Disqus 8.x-1.x
 =================================
 
 Disqus Official PHP API Support
@@ -8,27 +8,34 @@ Disqus Official PHP API Support
 
 INSTALL
 =============
-You will need to install the Libraries API module.
+1. You will need to install the Composer Manager module.
 
-https://drupal.org/project/libraries
+   https://www.drupal.org/project/composer_manager
 
-The Disqus Official PHP API can be downloaded at:
+   Make sure you have drush installed (Drush is a command-line shell and scripting
+   interface for Drupal).
+   Read the installation instructions for installing drush here:
 
-https://github.com/disqus/disqus-php
+   https://github.com/drush-ops/drush
 
-Copy the contents of the disqusapi folder to sites/all/libraries/disqusapi.
-You will need to obtain your user access key from the application specific
-page found here:
+2. Obtain your user access key from the application specific page found here:
 
-http://disqus.com/api/applications/
+   http://disqus.com/api/applications/
+
+3. Now run the following commands from within your Drupal root directory to download 
+   the disqusapi bindings:
+
+   $ drush composer-json-rebuild
+
+   $ drush composer-manager install
 
 BUILT-IN FEATURES
 =============
 This module can automatically update and/or delete your Disqus threads when you
-delete/update your nodes. 
+delete/update the entities for which disqus field is enabled.
 
-Visit Disqus configuration page after you installed Disqus API to configure it's
-behaviour. 
+Visit Disqus configuration page (admin/config/services/disqus) after you have
+installed Disqus API to configure it's behaviour.
 
 EXAMPLES
 =============
@@ -50,19 +57,19 @@ Example: Calling threads/details and threads/update
   if ($disqus) {
     try {
       // Load the thread data from disqus. Passing thread is required to allow the thread:ident call to work correctly. There is a pull request to fix this issue.
-      $thread = $disqus->threads->details(array('forum' => $node->disqus['domain'], 'thread:ident' => $node->disqus['identifier'], 'thread' => '1', 'version' => '3.0'));
+      $thread = $disqus->threads->details(array('forum' => $config->get('disqus_domain'), 'thread:ident' => "{$entity->getEntityTypeId()}/{$entity->id()}", 'thread' => '1'));
     }
     catch (Exception $exception) {
       drupal_set_message(t('There was an error loading the thread details from Disqus.'), 'error');
-      watchdog('disqus', 'Error loading thread details for node @nid. Check your API keys.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+      \Drupal::logger('disqus')->error('Error loading thread details for entity : !identifier. Check your API keys.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
     }
     if (isset($thread->id)) {
       try {
-        $disqus->threads->update(array('access_token' => variable_get('disqus_useraccesstoken', ''), 'thread' => $thread->id, 'forum' => $node->disqus['domain'], 'title' => $node->disqus['title'], 'url' => $node->disqus['url'], 'version' => '3.0'));
+        $disqus->threads->update(array('access_token' => $config->get('advanced.disqus_useraccesstoken'), 'thread' => $thread->id, 'forum' => $config->get('disqus_domain'), 'title' => $entity->label(), 'url' => $entity->url('canonical',array('absolute' => TRUE))));
       }
       catch (Exception $exception) {
         drupal_set_message(t('There was an error updating the thread details on Disqus.'), 'error');
-        watchdog('disqus', 'Error updating thread details for node @nid. Check your user access token.', array('@nid' => $node->nid), WATCHDOG_ERROR, 'admin/config/services/disqus');
+        \Drupal::logger('disqus')->error('Error updating thread details for entity : !identifier. Check your user access token.', array('!identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}"));
       }
     }
   }
