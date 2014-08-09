@@ -148,14 +148,14 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       $data['url'] = url('user/' . $account->id(), array('absolute' => TRUE));
 
       // Load the user's avatar.
-      $user_picture_default = \Drupal::config('field.instance.user.user.user_picture')->get('user_picture_default');
+      $user_picture_default = \Drupal::config('field.instance.user.user.user_picture')->get('settings.default_image');
 
       $user = user_load($account->id());
       if (isset($user->user_picture->target_id) && !empty($user->user_picture->target_id) && $file = file_load($user->user_picture->target_id)) {
         $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
       }
-      elseif (!empty($user_picture_default)) {
-        $data['avatar'] = $user_picture_default;
+      elseif (!empty($user_picture_default) && $file = file_load($user_picture_default['fid'])) {
+        $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
       }
       if (isset($data['avatar'])) {
         $data['avatar'] = file_create_url($data['avatar']);
