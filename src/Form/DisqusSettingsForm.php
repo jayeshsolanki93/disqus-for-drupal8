@@ -197,7 +197,13 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#type' => 'managed_file',
       '#title' => t('Custom Logo'),
       '#upload_location' => 'public://images',
-      '#default_value' => $disqus_config->get('advanced.sso.disqus_logo'),
+      '#default_value' => array($disqus_config->get('advanced.sso.disqus_logo')),
+      '#upload_validators' => array(
+        'file_validate_extensions' => array('gif png jpg jpeg'),
+        // Disqus recommends the login button resolution as (143x32)
+        // https://help.disqus.com/customer/portal/articles/236206-integrating-single-sign-on
+        'file_validate_image_resolution' => array('143x32'),
+      ),
       '#states' => array(
         'disabled' => array(
           'input[name="disqus_sso"]' => array('checked' => FALSE),
@@ -225,7 +231,6 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
       ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
       ->set('advanced.sso.disqus_use_site_logo', $form_state['values']['disqus_use_site_logo'])
-      ->set('advanced.sso.disqus_logo', $form_state['values']['disqus_logo'])
       ->save();
 
     if(isset($form_state['values']['disqus_api_update'])) {
@@ -236,25 +241,23 @@ class DisqusSettingsForm extends ConfigFormBase {
       $config->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])->save();
     }
 
+    $old_logo = $config->get('advanced.sso.disqus_logo');
+    $new_logo = ($form_state['values']['disqus_logo'] != null) ? $form_state['values']['disqus_logo'][0] : '';
+    // Ignore if the file hasn't changed.
+    if ($new_logo != $old_logo) {
+      // Remove the old file and usage if previously set.
+      if ($old_logo != '') {
+        $file = file_load($old_logo);
+        \Drupal::service('file.usage')->delete($file, 'disqus', 'disqus');
+      }
+      // Update the new file and usage.
+      if ($new_logo != '') {
+        $file = file_load($new_logo);
+        \Drupal::service('file.usage')->add($file, 'disqus', 'disqus', 1);
+      }
+    }
+    $config->set('advanced.sso.disqus_logo', $new_logo)->save();
     parent::submitForm($form, $form_state);
-
-    // $old_logo = variable_get('disqus_logo', '');
-    // $new_logo = (isset($form_state['values']['disqus_logo'])) ? $form_state['values']['disqus_logo'] : '';
-    // // Ignore if the file hasn't changed.
-    // if ($new_logo != $old_logo) {
-    //   // Remove the old file and usage if previously set.
-    //   if ($old_logo != '') {
-    //     $file = file_load($old_logo);
-    //     file_usage_delete($file, 'disqus', 'disqus');
-    //     file_delete($file);
-    //   }
-    //   // Update the new file and usage.
-    //   if ($new_logo != '') {
-    //     $file = file_load($new_logo);
-    //     file_usage_add($file, 'disqus', 'disqus', 0);
-    //     $file->status = FILE_STATUS_PERMANENT;
-    //     file_save($file);
-    //   }
-    // }
   }
+
 }
