@@ -103,8 +103,7 @@ class DisqusComment extends SourcePluginBase {
     return array(
       'id' => $this->t('Comment ID.'),
       'pid' => $this->t('Parent comment ID. If set to null, this comment is not a reply to an existing comment.'),
-      'entity_id' => $this->t('The entity to which this comment belongs.'),
-      'entity_type' => $this->t('The entity-type of the entity on which this comment belongs.'),
+      'identifier' => $this->t("The disqus identifier to look up the corrent thread."),
       'name' => $this->t("The comment author's name."),
       'user_id' => $this->t('The disqus user-id of the author who commented.'),
       'email' => $this->t("The comment author's email address."),
@@ -140,10 +139,7 @@ class DisqusComment extends SourcePluginBase {
           $items[$id]['id'] = $id;
           $items[$id]['pid'] = $post['parent'];
           $thread = $disqus->threads->details(array('thread' => $post['thread']));
-          $identifier = $thread['identifier'];
-          $id_parts = explode("/", $thread['identifier']);
-          $items[$id]['entity_type'] = $id_parts[0];
-          $items[$id]['entity_id'] = $id_parts[1];
+          $items[$id]['identifier'] = $thread['identifier'];
           $items[$id]['name'] = $post['author']['name'];
           $items[$id]['email'] = $post['author']['email'];
           $items[$id]['user_id'] = $post['author']['id'];

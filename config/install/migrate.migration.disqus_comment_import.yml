@@ -10,8 +10,12 @@ source:
 process:
   cid: id
   pid: pid
-  entity_id: entity_id
-  entity_type: entity_type
+  entity_id:
+    plugin: disqus_comment_entity_id
+    source: identifier
+  entity_type:
+    plugin: disqus_comment_entity_type
+    source: identifier
   field_name: constants/field_name
   comment_type: constants/comment_no_subject
   uid: uid
