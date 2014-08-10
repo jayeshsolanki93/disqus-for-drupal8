@@ -11,6 +11,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandler;
+use Drupal\file\FileUsage\DatabaseFileUsageBackend;
 
 class DisqusSettingsForm extends ConfigFormBase {
 
@@ -22,6 +23,13 @@ class DisqusSettingsForm extends ConfigFormBase {
   protected $moduleHandler;
 
   /**
+   * A database backend file usage overridable.
+   *
+   * @var \Drupal\file\FileUsage\DatabaseFileUsageBackend
+   */
+  protected $fileUsage;
+
+  /**
    * Constructs a \Drupal\disqus\DisqusSettingsForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -29,9 +37,10 @@ class DisqusSettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Extension\ModuleHandler $module_handler
    *   The module handler.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandler $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandler $module_handler, DataBaseFileUsageBackend $file_usage) {
     parent::__construct($config_factory);
     $this->moduleHandler = $module_handler;
+    $this->fileUsage = $file_usage;
   }
 
   /**
@@ -40,7 +49,8 @@ class DisqusSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('file.usage')
     );
   }
 
@@ -56,7 +66,6 @@ class DisqusSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, array &$form_state) {
     $disqus_config = $this->config('disqus.settings');
-
     $form['disqus_domain'] = array(
       '#type' => 'textfield',
       '#title' => t('Shortname'),
@@ -246,14 +255,14 @@ class DisqusSettingsForm extends ConfigFormBase {
     // Ignore if the file hasn't changed.
     if ($new_logo != $old_logo) {
       // Remove the old file and usage if previously set.
-      if ($old_logo != '') {
+      if (!empty($old_logo)) {
         $file = file_load($old_logo);
-        \Drupal::service('file.usage')->delete($file, 'disqus', 'disqus');
+        $this->fileUsage->delete($file, 'disqus', 'disqus');
       }
       // Update the new file and usage.
-      if ($new_logo != '') {
+      if (!empty($new_logo)) {
         $file = file_load($new_logo);
-        \Drupal::service('file.usage')->add($file, 'disqus', 'disqus', 1);
+        $this->fileUsage->add($file, 'disqus', 'disqus', 1);
       }
     }
     $config->set('advanced.sso.disqus_logo', $new_logo)->save();
