@@ -281,7 +281,7 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
  */
 function disqus_views_data_alter(&$data) {
   // Number of Disqus comments made on the given node.
-  $data['node']['disqus_comment_count']['field'] = array(
+  $data['node']['nid']['field'] = array(
     'title' => t('Disqus Comment Count'),
     'group' => t('Content'),
     'help' => t('The number of Disqus comments made on the post. Note that this will not work in the preview.'),
