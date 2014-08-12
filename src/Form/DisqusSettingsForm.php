@@ -11,6 +11,7 @@ use Drupal\Core\Form\ConfigFormBase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandler;
+use Drupal\file\FileUsage\DatabaseFileUsageBackend;
 
 class DisqusSettingsForm extends ConfigFormBase {
 
@@ -22,6 +23,13 @@ class DisqusSettingsForm extends ConfigFormBase {
   protected $moduleHandler;
 
   /**
+   * A database backend file usage overridable.
+   *
+   * @var \Drupal\file\FileUsage\DatabaseFileUsageBackend
+   */
+  protected $fileUsage;
+
+  /**
    * Constructs a \Drupal\disqus\DisqusSettingsForm object.
    *
    * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
@@ -29,9 +37,10 @@ class DisqusSettingsForm extends ConfigFormBase {
    * @param \Drupal\Core\Extension\ModuleHandler $module_handler
    *   The module handler.
    */
-  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandler $module_handler) {
+  public function __construct(ConfigFactoryInterface $config_factory, ModuleHandler $module_handler, DataBaseFileUsageBackend $file_usage) {
     parent::__construct($config_factory);
     $this->moduleHandler = $module_handler;
+    $this->fileUsage = $file_usage;
   }
 
   /**
@@ -40,7 +49,8 @@ class DisqusSettingsForm extends ConfigFormBase {
   public static function create(ContainerInterface $container) {
     return new static(
       $container->get('config.factory'),
-      $container->get('module_handler')
+      $container->get('module_handler'),
+      $container->get('file.usage')
     );
   }
 
@@ -56,7 +66,6 @@ class DisqusSettingsForm extends ConfigFormBase {
    */
   public function buildForm(array $form, array &$form_state) {
     $disqus_config = $this->config('disqus.settings');
-
     $form['disqus_domain'] = array(
       '#type' => 'textfield',
       '#title' => t('Shortname'),
@@ -197,7 +206,13 @@ class DisqusSettingsForm extends ConfigFormBase {
       '#type' => 'managed_file',
       '#title' => t('Custom Logo'),
       '#upload_location' => 'public://images',
-      '#default_value' => $disqus_config->get('advanced.sso.disqus_logo'),
+      '#default_value' => array($disqus_config->get('advanced.sso.disqus_logo')),
+      '#upload_validators' => array(
+        'file_validate_extensions' => array('gif png jpg jpeg'),
+        // Disqus recommends the login button resolution as (143x32)
+        // https://help.disqus.com/customer/portal/articles/236206-integrating-single-sign-on
+        'file_validate_image_resolution' => array('143x32'),
+      ),
       '#states' => array(
         'disabled' => array(
           'input[name="disqus_sso"]' => array('checked' => FALSE),
@@ -225,7 +240,6 @@ class DisqusSettingsForm extends ConfigFormBase {
       ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
       ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
       ->set('advanced.sso.disqus_use_site_logo', $form_state['values']['disqus_use_site_logo'])
-      ->set('advanced.sso.disqus_logo', $form_state['values']['disqus_logo'])
       ->save();
 
     if(isset($form_state['values']['disqus_api_update'])) {
@@ -236,25 +250,23 @@ class DisqusSettingsForm extends ConfigFormBase {
       $config->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])->save();
     }
 
+    $old_logo = $config->get('advanced.sso.disqus_logo');
+    $new_logo = ($form_state['values']['disqus_logo'] != null) ? $form_state['values']['disqus_logo'][0] : '';
+    // Ignore if the file hasn't changed.
+    if ($new_logo != $old_logo) {
+      // Remove the old file and usage if previously set.
+      if (!empty($old_logo)) {
+        $file = file_load($old_logo);
+        $this->fileUsage->delete($file, 'disqus', 'disqus');
+      }
+      // Update the new file and usage.
+      if (!empty($new_logo)) {
+        $file = file_load($new_logo);
+        $this->fileUsage->add($file, 'disqus', 'disqus', 1);
+      }
+    }
+    $config->set('advanced.sso.disqus_logo', $new_logo)->save();
     parent::submitForm($form, $form_state);
-
-    // $old_logo = variable_get('disqus_logo', '');
-    // $new_logo = (isset($form_state['values']['disqus_logo'])) ? $form_state['values']['disqus_logo'] : '';
-    // // Ignore if the file hasn't changed.
-    // if ($new_logo != $old_logo) {
-    //   // Remove the old file and usage if previously set.
-    //   if ($old_logo != '') {
-    //     $file = file_load($old_logo);
-    //     file_usage_delete($file, 'disqus', 'disqus');
-    //     file_delete($file);
-    //   }
-    //   // Update the new file and usage.
-    //   if ($new_logo != '') {
-    //     $file = file_load($new_logo);
-    //     file_usage_add($file, 'disqus', 'disqus', 0);
-    //     $file->status = FILE_STATUS_PERMANENT;
-    //     file_save($file);
-    //   }
-    // }
   }
+
 }
