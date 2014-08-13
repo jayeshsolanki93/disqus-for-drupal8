@@ -9,6 +9,7 @@ namespace Drupal\disqus\Plugin\Block;
 
 use Drupal\block\Annotation\Block;
 use Drupal\Core\Annotation\Translation;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  *
@@ -24,7 +25,7 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
   /**
    * Overrides DisqusBaseBlock::blockForm().
    */
-  public function blockForm($form, &$form_state) {
+  public function blockForm($form, FormStateInterface $form_state) {
     $form['disqus'] = array(
       '#type' => 'fieldset',
       '#title' => t('Disqus settings'),
@@ -39,7 +40,7 @@ class DisqusCommentsBlock extends DisqusBaseBlock {
   /**
    * Overrides DisqusBaseBlock::blockSubmit().
    */
-  public function blockSubmit($form, &$form_state) {
+  public function blockSubmit($form, FormStateInterface $form_state) {
   }
 
   /**

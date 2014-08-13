@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Config\ConfigFactoryInterface;
 use Drupal\Core\Extension\ModuleHandler;
 use Drupal\file\FileUsage\DatabaseFileUsageBackend;
+use Drupal\Core\Form\FormStateInterface;
 
 class DisqusSettingsForm extends ConfigFormBase {
 
@@ -64,7 +65,7 @@ class DisqusSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, array &$form_state) {
+  public function buildForm(array $form, FormStateInterface $form_state) {
     $disqus_config = $this->config('disqus.settings');
     $form['disqus_domain'] = array(
       '#type' => 'textfield',
@@ -228,7 +229,7 @@ class DisqusSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
-  public function submitForm(array &$form, array &$form_state) {
+  public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('disqus.settings');
     $config
       ->set('disqus_domain', $form_state['values']['disqus_domain'])
