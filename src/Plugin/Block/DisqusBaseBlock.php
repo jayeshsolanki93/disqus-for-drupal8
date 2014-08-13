@@ -116,7 +116,7 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
   /**
    * Helper for blockForm() method.
    */
-  public function _blockForm($form, $form_state, $delta) {
+  public function _blockForm($form, FormStateInterface $form_state, $delta) {
     $form['disqus'] = array(
       '#type' => 'fieldset',
       '#title' => t('Disqus settings'),
@@ -194,7 +194,7 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
    * Overrides \Drupal\block\BlockBase::blockSubmit().
    */
   public function blockSubmit($form, FormStateInterface $form_state) {
-    foreach ($form_state['values']['disqus'] as $k => $v) {
+    foreach ($form_state->getValue('disqus') as $k => $v) {
       if ($form['settings']['disqus'][$k]['#access']) {
         $this->configuration[$k] = $v;
       }

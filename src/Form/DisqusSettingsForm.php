@@ -232,27 +232,28 @@ class DisqusSettingsForm extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $config = $this->config('disqus.settings');
     $config
-      ->set('disqus_domain', $form_state['values']['disqus_domain'])
-      ->set('behavior.disqus_localization', $form_state['values']['disqus_localization'])
-      ->set('behavior.disqus_inherit_login', $form_state['values']['disqus_inherit_login'])
-      ->set('behavior.disqus_disable_mobile', $form_state['values']['disqus_disable_mobile'])
-      ->set('advanced.disqus_useraccesstoken', $form_state['values']['disqus_useraccesstoken'])
-      ->set('advanced.disqus_publickey', $form_state['values']['disqus_publickey'])
-      ->set('advanced.disqus_secretkey', $form_state['values']['disqus_secretkey'])
-      ->set('advanced.sso.disqus_sso', $form_state['values']['disqus_sso'])
-      ->set('advanced.sso.disqus_use_site_logo', $form_state['values']['disqus_use_site_logo'])
+      ->set('disqus_domain', $form_state->getValue('disqus_domain'))
+      ->set('behavior.disqus_localization', $form_state->getValue('disqus_localization'))
+      ->set('behavior.disqus_inherit_login', $form_state->getValue('disqus_inherit_login'))
+      ->set('behavior.disqus_disable_mobile', $form_state->getValue('disqus_disable_mobile'))
+      ->set('advanced.disqus_useraccesstoken', $form_state->getValue('disqus_useraccesstoken'))
+      ->set('advanced.disqus_publickey', $form_state->getValue('disqus_publickey'))
+      ->set('advanced.disqus_secretkey', $form_state->getValue('disqus_secretkey'))
+      ->set('advanced.sso.disqus_sso', $form_state->getValue('disqus_sso'))
+      ->set('advanced.sso.disqus_use_site_logo', $form_state->getValue('disqus_use_site_logo'))
       ->save();
 
-    if(isset($form_state['values']['disqus_api_update'])) {
-      $config->set('advanced.api.disqus_api_update', $form_state['values']['disqus_api_update'])->save();
+    if($form_state->hasValue('disqus_api_update')) {
+      $config->set('advanced.api.disqus_api_update', $form_state->getValue('disqus_api_update'))->save();
     }
 
-    if(isset($form_state['values']['disqus_api_delete'])) {
-      $config->set('advanced.api.disqus_api_delete', $form_state['values']['disqus_api_delete'])->save();
+    if($form_state->hasValue('disqus_api_delete')) {
+      $config->set('advanced.api.disqus_api_delete', $form_state->getValue('disqus_api_delete'))->save();
     }
 
     $old_logo = $config->get('advanced.sso.disqus_logo');
-    $new_logo = ($form_state['values']['disqus_logo'] != null) ? $form_state['values']['disqus_logo'][0] : '';
+    $new_logo = (!$form_state->isValueEmpty('disqus_logo')) ? $form_state->getValue(array('disqus_logo', 0)) : '';
+
     // Ignore if the file hasn't changed.
     if ($new_logo != $old_logo) {
       // Remove the old file and usage if previously set.
