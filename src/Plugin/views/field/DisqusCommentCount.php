@@ -9,6 +9,7 @@ use \Drupal\node\Entity\Node;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\disqus\DisqusCommentManager;
+use Drupal\Core\Config\ConfigFactoryInterface;
 
 /**
  * Field handler to present the number of Disqus comments on a node.
@@ -34,6 +35,13 @@ class DisqusCommentCount extends FieldPluginBase {
   protected $disqusManager;
 
   /**
+   * The disqus.settings configuration.
+   *
+   * @var \Drupal\Core\Config\Config
+   */
+  protected $config;
+
+  /**
    * Constructs a 'Disqus Comment Count' view field plugin.
    *
    * @param array $configuration
@@ -46,11 +54,14 @@ class DisqusCommentCount extends FieldPluginBase {
    *   The current user.
    * @param \Drupal\disqus\DisqusCommentManager $disqusManager
    *   The disqus comment manager object.
+   * @param \Drupal\Core\Config\ConfigFactoryInterface $config_factory
+   *   The config factory.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user, DisqusCommentManager $disqus_manager) {
+  public function __construct(array $configuration, $plugin_id, $plugin_definition, AccountInterface $current_user, DisqusCommentManager $disqus_manager, ConfigFactoryInterface $config_factory) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->currentUser = $current_user;
     $this->disqusManager = $disqus_manager;
+    $this->config = $config_factory->get('disqus.settings');
   }
 
   /**
@@ -62,7 +73,8 @@ class DisqusCommentCount extends FieldPluginBase {
       $plugin_id,
       $plugin_definition,
       $container->get('current_user'),
-      $container->get('disqus.manager')
+      $container->get('disqus.manager'),
+      $container->get('config.factory')
     );
   }
 
@@ -70,22 +82,22 @@ class DisqusCommentCount extends FieldPluginBase {
    * {@inheritdoc}
    */
   function render(ResultRow $values) {
-    // Ensure Disqus comments are available on the node user has access to edit this node.
-    $node = Node::load($values->nid);
-    $field = $this->disqusManager->getFields('node');
-    if(!$node->hasField(key($field))) {
+    // Ensure Disqus comments are available on the entity and user has access to edit this entity.
+    $entity = $values->_entity;
+    $field = $this->disqusManager->getFields($entity->getEntityTypeId());
+    if(!$entity->hasField(key($field))) {
       return;
     }
-    if ($node->get(key($field))->status && $this->currentUser->hasPermission('view disqus comments')) {
+    if ($entity->get(key($field))->status && $this->currentUser->hasPermission('view disqus comments')) {
       // Build a renderable array for the link.
       $links['disqus_comments_num'] = array(
         'title' => t('Comments'),
-        'href' => $node->url('canonical',array('absolute' => TRUE)),
+        'href' => $entity->url('canonical',array('absolute' => TRUE)),
         'fragment' => 'disqus_thread',
         'attributes' => array(
           // Identify the node for Disqus with the unique identifier:
           // http://docs.disqus.com/developers/universal/#comment-count
-          'data-disqus-identifier' => 'node/' . $node->id(),
+          'data-disqus-identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}",
         ),
       );
       $content = array(
@@ -107,12 +119,12 @@ class DisqusCommentCount extends FieldPluginBase {
         'js' => array(
           array('data' => drupal_get_path('module', 'disqus') . '/disqus.js'),
           array(
-            'data' => array('disqusComments' => \Drupal::config('disqus.settings')->get('disqus_domain')),
+            'data' => array('disqusComments' => $this->config->get('disqus_domain')),
             'type' => 'setting',
           ),
         ),
       );
-      return drupal_render($content);
+      return $content;
     }
   }
 }
