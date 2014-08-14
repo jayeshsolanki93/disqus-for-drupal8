@@ -277,16 +277,19 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
 }
 
 /**
- * Implements hook_views_data_alter().
+ * Implements hook_field_views_data().
  */
-function disqus_views_data_alter(&$data) {
-  // Number of Disqus comments made on the given node.
-  $data['node']['disqus_comment_count']['field'] = array(
-    'title' => t('Disqus Comment Count'),
-    'group' => t('Content'),
-    'help' => t('The number of Disqus comments made on the post. Note that this will not work in the preview.'),
-    'id' => 'disqus_comment_count',
-  );
+function disqus_field_views_data(\Drupal\field\FieldStorageConfigInterface $field_storage) {
+  $data = field_views_field_default_views_data($field_storage);
+  foreach ($data as $table_name => $table_data) {
+    $data[$table_name]['entity_id']['field'] = array(
+      'title' => t('Disqus Comment Count'),
+      'group' => t('Content'),
+      'help' => t('The number of Disqus comments made on the post. Note that this will not work in the preview.'),
+      'id' => 'disqus_comment_count',
+    );
+  }
+  return $data;
 }
 
 /**
