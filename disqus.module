@@ -66,18 +66,6 @@ function disqus_permission() {
 }
 
 /**
- * Implements hook_element_info().
- */
-function disqus_element_info() {
-  $types['disqus'] = array(
-    '#disqus' => array(),
-    '#theme_wrappers' => array('disqus_noscript', 'container'),
-    '#attributes' => array('id' => 'disqus_thread'),
-  );
-  return $types;
-}
-
-/**
  * Post render function of the Disqus element to inject the Disqus JavaScript.
  */
 function disqus_element_post_render_cache(array $element, array $context) {
