@@ -2,7 +2,7 @@
 
 /**
  * @file
- * Contains \Drupal\comment\DisqusCommentManagerInterface.
+ * Contains \Drupal\disqus\DisqusCommentManagerInterface.
  */
 
 namespace Drupal\disqus;

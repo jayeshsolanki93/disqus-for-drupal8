@@ -1,8 +1,8 @@
 <?php
 
 /**
- *  @file
- *  Contains \Drupal\comment\DisqusCommentManager.
+ * @file
+ * Contains \Drupal\disqus\DisqusCommentManager.
  */
 
 namespace Drupal\disqus;

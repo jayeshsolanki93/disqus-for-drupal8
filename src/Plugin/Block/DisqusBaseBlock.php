@@ -13,6 +13,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\disqus\DisqusCommentManager;
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Form\FormStateInterface;
 
 abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -108,14 +109,14 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
   /**
    * Overrides \Drupal\block\BlockBase::blockForm().
    */
-  public function blockForm($form, &$form_state) {
+  public function blockForm($form, FormStateInterface $form_state) {
     return $this->_blockForm($form, $form_state, $this->id);
   }
 
   /**
    * Helper for blockForm() method.
    */
-  public function _blockForm($form, &$form_state, $delta) {
+  public function _blockForm($form, FormStateInterface $form_state, $delta) {
     $form['disqus'] = array(
       '#type' => 'fieldset',
       '#title' => t('Disqus settings'),
@@ -192,8 +193,8 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
   /**
    * Overrides \Drupal\block\BlockBase::blockSubmit().
    */
-  public function blockSubmit($form, &$form_state) {
-    foreach ($form_state['values']['disqus'] as $k => $v) {
+  public function blockSubmit($form, FormStateInterface $form_state) {
+    foreach ($form_state->getValue('disqus') as $k => $v) {
       if ($form['settings']['disqus'][$k]['#access']) {
         $this->configuration[$k] = $v;
       }
