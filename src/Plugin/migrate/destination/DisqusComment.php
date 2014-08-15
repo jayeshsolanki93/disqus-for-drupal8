@@ -106,7 +106,7 @@ class DisqusComment extends DestinationBase {
         $this->logger->error('Error loading thread details for entity : !identifier. Check your API keys.', array('!identifier' => $identifier));
         $thread = null;
       }
-      if(!isset($thread->id)) {
+      if (!isset($thread->id)) {
         try {
           $thread = $disqus->threads->create(array('forum' =>  $this->config->get('disqus_domain'), 'access_token' => $this->config->get('advanced.disqus_useraccesstoken'), 'title' => $row->getDestinationProperty('title'),  'identifier' => $identifier));
         }
@@ -115,8 +115,34 @@ class DisqusComment extends DestinationBase {
         }
       }
       try {
-        //cannot create posts as anonymous user, needs 'api_key' (api_key is not the public key)
-        $disqus->posts->create(array('message' => $row->getDestinationProperty('message'), 'thread' => $thread->id, 'author_name' => $row->getDestinationProperty('author_name'), 'author_email' => $row->getDestinationProperty('author_email'), 'author_url' => $row->getDestinationProperty('author_url'), 'date' => $row->getDestinationProperty('date'), 'ip_address' => $row->getDestinationProperty('ip_address')));
+        $message = $row->getDestinationProperty('message');
+        $author_name = $row->getDestinationProperty('author_name');
+        $author_email = $row->getDestinationProperty('author_email');
+        $author_url = $row->getDestinationProperty('author_url');
+        $date = $row->getDestinationProperty('author_url');
+        $ip_address = $row->getDestinationProperty('ip_address');
+        if (empty($author_name) || empty($author_email)) {
+          // post comment as created by site's moderator
+          $disqus->posts->create(array(
+            'message' => $message,
+            'thread' => $thread->id,
+            'access_token' => $this->config->get('advanced.disqus_useraccesstoken'),
+            'date' => $date,
+            'ip_address' => $ip_address,
+          ));
+        }
+        else {
+          //cannot create comment as anonymous user, needs 'api_key' (api_key is not the public key)
+          $disqus->posts->create(array(
+            'thread' => $thread,
+            'message' => $message,
+            'author_name' => $author_name,
+            'author_email' => $author_email,
+            'author_url' => $author_url,
+            'date' =>  $date,
+            'ip_address' => $ip_address,
+          ));
+        }
         return TRUE;
       }
       catch (Exception $exception) {
