@@ -17,7 +17,12 @@ Installation
 
 Additional Requirements
 --------
-1. You will need to install the [Composer Manager][2] module. Also make sure you have drush installed ([Drush][3] is a command-line shell and scripting interface for Drupal)
+For using the [Disqus API][2] to communicate with the Disqus data you will need to download the Disqus API bindings.
+Disqus module uses the api for updating/deleting disqus threads on updation/deletion of entities on your Drupal site. Also for migration of comments from a Drupal site to Disqus and vice-versa requires the Disqus API bindings.
+
+Follow the steps below to download the Disqus API bindings:
+
+1. You will need to install the [Composer Manager][3] module. Also make sure you have drush installed ([Drush][4] is a command-line shell and scripting interface for Drupal)
 2. Obtain your `user access key` from the application specific page http://disqus.com/api/applications/
 3. Now run the following commands from within your Drupal root directory to download the DisqusAPI bindings:
 
@@ -30,9 +35,9 @@ Additional Requirements
 Built-in Features
 -------
 - This module automatically updates and/or delete your Disqus threads when you delete/update the entities for which disqus field is enabled.
-- Visit Disqus configuration page after you have installed [Disqus API][4] to  configure it's behaviour.
+- Visit Disqus configuration page after you have installed [Disqus API][5] to  configure it's behaviour.
 
-> **Note:** Using this feature also requires the `public_key` or`secret_key`.
+> **Note:** Using this feature also requires the `public_key` or`secret_key`
 
 ####Examples
 You can find the API reference here : http://disqus.com/api/docs/
@@ -67,6 +72,7 @@ https://github.com/disqus/disqus-php/blob/master/README.rst
   }
 ```
   [1]: disqus.com
-  [2]: https://www.drupal.org/project/composer_manager
-  [3]: https://github.com/drush-ops/drush
-  [4]: https://github.com/angrycodr/disqus-for-drupal8/tree/Update-docs#additional-requirements
+  [2]: https://disqus.com/api/docs/
+  [3]: https://www.drupal.org/project/composer_manager
+  [4]: https://github.com/drush-ops/drush
+  [5]: #additional-requirements
