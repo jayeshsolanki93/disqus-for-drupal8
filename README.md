@@ -3,8 +3,8 @@ Disqus Module
 
 Disqus module for Drupal 8. Disqus is a popular 3rd party commenting system for websites and online communities.
 
-For a full description visit the project page: http://drupal.org/project/project
-Bug reports, feature suggestions and latest developments: http://drupal.org/project/issues/disqus
++ For a full description visit the project page: http://drupal.org/project/project
++ Bug reports, feature suggestions and latest developments: http://drupal.org/project/issues/disqus
 
 Installation
 ----------
