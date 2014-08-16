@@ -8,7 +8,6 @@ Bug reports, feature suggestions and latest developments: http://drupal.org/proj
 
 Installation
 ----------
-----------
 1. Download and enable the module.
 2. Register your websites shortname on [Disqus.com][1]
 3. In the Disqus configuration, set the shortname to what you registered with Disqus.
@@ -17,7 +16,6 @@ Installation
 6. Visit the permissions, and set which users you would like to have the ability to view Disqus threads (recommended for role).
 
 Additional Requirements
---------
 --------
 1. You will need to install the [Composer Manager][2] module. Also make sure you have drush installed ([Drush][3] is a command-line shell and scripting interface for Drupal)
 2. Obtain your `user access key` from the application specific page http://disqus.com/api/applications/
@@ -30,7 +28,6 @@ Additional Requirements
   $ drush composer-manager install
 ```
 Built-in Features
--------
 -------
 - This module automatically updates and/or delete your Disqus threads when you delete/update the entities for which disqus field is enabled.
 - Visit Disqus configuration page after you have installed [Disqus API][4] to  configure it's behaviour.
@@ -72,4 +69,4 @@ https://github.com/disqus/disqus-php/blob/master/README.rst
   [1]: disqus.com
   [2]: https://www.drupal.org/project/composer_manager
   [3]: https://github.com/drush-ops/drush
-  [4]: Additional%20Requirements
+  [4]: https://github.com/angrycodr/disqus-for-drupal8/tree/Update-docs#additional-requirements
