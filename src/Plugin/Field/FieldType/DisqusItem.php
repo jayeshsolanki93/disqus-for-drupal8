@@ -10,6 +10,7 @@ namespace Drupal\disqus\Plugin\Field\FieldType;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\Form\FormStateInterface;
 
 /**
  * Plugin implementation of the 'disqus' field type.
@@ -23,6 +24,15 @@ use Drupal\Core\TypedData\DataDefinition;
  * )
  */
 class DisqusItem extends FieldItemBase {
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function defaultSettings() {
+    return array(
+      'category_id' => NULL,
+    ) + parent::defaultSettings();
+  }
 
   /**
    * {@inheritdoc}
@@ -68,6 +78,29 @@ class DisqusItem extends FieldItemBase {
   public function isEmpty() {
     $value = $this->get('status')->getValue();
     return $value === NULL || $value === '';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function settingsForm(array &$form, FormStateInterface $form_state, $has_data) {
+    $element = array();
+    $settings = $this->getFieldDefinition()->getFieldStorageDefinition()->getSettings();
+    $disqus = disqus_api();
+    if ($disqus && empty($settings['category_id'])) {
+      try {
+        $category = $disqus->categories->create(array('forum' => \Drupal::config('disqus.settings')->get('disqus_domain'), 'title' => $this->getEntity()->bundle(), 'access_token' => \Drupal::config('disqus.settings')->get('advanced.disqus_useraccesstoken')));
+        $settings['category_id'] = $category->id;
+      }
+      catch (Exception $exception) {
+        \Drupal::logger('disqus')->error('Error creating category. Check your API keys.');
+      }
+    }
+    $element['category_id'] = array(
+      '#type' => 'value',
+      '#value' => $settings['category_id'],
+    );
+    return $element;
   }
 
 }

@@ -39,6 +39,7 @@ class Disqus extends RenderElement {
       'title' => $entity->label(),
       'identifier' => "{$entity->getEntityTypeId()}/{$entity->id()}",
     );
+    $disqus['category_id'] = $context['category_id'];
     $disqus['disable_mobile'] = \Drupal::config('disqus.settings')->get('behavior.disqus_disable_mobile');
 
     // If the user is logged in, we can inject the username and email for Disqus.
