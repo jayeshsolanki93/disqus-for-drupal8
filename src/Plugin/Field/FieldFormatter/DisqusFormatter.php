@@ -82,7 +82,7 @@ class DisqusFormatter extends FormatterBase implements ContainerFactoryPluginInt
       $element[] = array(
         '#type' => 'disqus',
         '#post_render_cache' => array(
-          'disqus_element_post_render_cache' => array(
+          '\Drupal\disqus\Element\Disqus::disqus_element_post_render_cache' => array(
             array('entity' => $items->getEntity()),
           ),
         ),

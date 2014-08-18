@@ -154,7 +154,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       if (isset($user->user_picture->target_id) && !empty($user->user_picture->target_id) && $file = file_load($user->user_picture->target_id)) {
         $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
       }
-      elseif (!empty($user_picture_default) && $file = file_load($user_picture_default['fid'])) {
+      elseif (!empty($user_picture_default['fid']) && $file = file_load($user_picture_default['fid'])) {
         $data['avatar'] = !empty($file->getFileUri()) ? $file->getFileUri() : NULL;
       }
       if (isset($data['avatar'])) {
