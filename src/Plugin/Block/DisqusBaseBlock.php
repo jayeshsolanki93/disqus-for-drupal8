@@ -14,6 +14,7 @@ use Drupal\Core\Session\AccountInterface;
 use Drupal\disqus\DisqusCommentManager;
 use Drupal\Core\Routing\RouteMatchInterface;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
 
 abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPluginInterface {
 
@@ -262,11 +263,11 @@ abstract class DisqusBaseBlock extends BlockBase implements ContainerFactoryPlug
       }
     }
 
-    $url = url("//disqus.com/forums/${options['domain']}/$function.js", array('external' => TRUE, 'query' => $query));
+    $url = Url::fromUri("//disqus.com/forums/${options['domain']}/$function.js", array('absolute' => TRUE, 'query' => $query));
 
     return array(
       'widget' => array(
-        '#prefix' => '<script type="text/javascript" src="'. $url .'">',
+        '#prefix' => '<script type="text/javascript" src="'. $url->toString() .'">',
         '#suffix' => '</script>',
         '#value' => '',
       ),

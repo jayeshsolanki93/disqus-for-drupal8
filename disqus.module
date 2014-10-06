@@ -6,6 +6,7 @@
  */
 
 use Drupal\Core\Routing\RouteMatchInterface;
+use Drupal\Core\Url;
 
 /**
  * API No action on entity delete.
@@ -233,8 +234,9 @@ function disqus_theme() {
  * Prepares the noscript tag which is used when JavaScript is not available.
  */
 function theme_disqus_noscript() {
+  $url = Url::fromUri('http://' . \Drupal::config('disqus.settings')->get('disqus_domain') . '.disqus.com/');
   $return = array(
-    '#markup' => '<noscript><p>' . l(t('View the discussion thread.'), 'http://' . \Drupal::config('disqus.settings')->get('disqus_domain') . '.disqus.com/') . '</p></noscript>'
+    '#markup' => '<noscript><p>' . \Drupal::l(t('View the discussion thread.'), $url) . '</p></noscript>'
   );
   return drupal_render($return);
 }
