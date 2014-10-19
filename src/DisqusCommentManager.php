@@ -10,12 +10,13 @@ namespace Drupal\disqus;
 use Drupal\Core\Entity\EntityManagerInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
+use Drupal\Core\Url;
 
 /**
  * Disqus comment manager contains common functions to manage disqus_comment fields.
  */
 class DisqusCommentManager implements DisqusCommentManagerInterface {
-  
+
   /**
    * The current user.
    *
@@ -29,7 +30,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
    * @var \Drupal\Core\Entity\EntityManagerInterface
    */
   protected $entityManager;
-  
+
 
   /**
    * The module handler service.
@@ -40,7 +41,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
 
   /**
    * Constructs the DisqusCommentManager object.
-   * 
+   *
    * @param \Drupal\Core\Entity\EntityManagerInterface $entity_manager
    *   The entity manager service.
    * @param \Drupal\Core\Session\AccountInterface $current_user
@@ -62,11 +63,11 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
     if (!$entity_type->isSubclassOf('\Drupal\Core\Entity\ContentEntityInterface')) {
       return array();
     }
-    
+
     $map = $this->getAllFields();
     return isset($map[$entity_type_id]) ? $map[$entity_type_id] : array();
   }
-  
+
   /**
    * {@inheritdoc}
    */
@@ -78,8 +79,8 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       foreach ($data as $field_name => $field_info) {
         if ($field_info['type'] == 'disqus_comment') {
           $disqus_comment_fields[$entity_type][$field_name] = $field_info;
-        } 
-      } 
+        }
+      }
     }
     return $disqus_comment_fields;
   }
@@ -92,9 +93,9 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
     $disqus['sso'] = array(
       'name' => \Drupal::config('system.site')->get('name'),
       // The login window must be closed once the user logs in.
-      'url' => url('user/login', array('query' => array('destination' => 'disqus/closewindow'))),
+      'url' => Url::fromRoute('user.login', array(), array('query' => array('destination' => 'disqus/closewindow'), 'absolute' => TRUE))->toString(),
       // The logout link must redirect back to the original page.
-      'logout' => url('user/logout', array('query' => array('destination' => current_path()))),
+      'logout' => Url::fromRoute('user.logout', array(), array('query' => array('destination' => current_path()), 'absolute' => TRUE))->toString(),
       'width' => 800,
       'height' => 600,
     );
@@ -108,7 +109,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       $disqus['sso']['button'] = $logo['url'];
     }
     else {
-      $disqus['sso']['button'] = url('core/misc/druplicon.png', array('absolute' => TRUE));
+      $disqus['sso']['button'] = Url::fromUri('base://core/misc/druplicon.png', array('absolute' => TRUE))->toString();
     }
     if ($favicon = theme_get_setting('favicon')) {
       $disqus['sso']['icon'] = $favicon['url'];
@@ -145,7 +146,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       $data['id'] = $account->id();
       $data['username'] = $account->getUsername();
       $data['email'] = $account->getEmail();
-      $data['url'] = url('user/' . $account->id(), array('absolute' => TRUE));
+      $data['url'] = Url::fromRoute('entity.user.canonical', array('user' => $account->id()), array('absolute' => TRUE))->toString();
 
       // Load the user's avatar.
       $user_picture_default = \Drupal::config('field.instance.user.user.user_picture')->get('settings.default_image');
