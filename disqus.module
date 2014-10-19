@@ -100,8 +100,8 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
           ),
         );
 
-        // Attach disqus.js to load the Disqus comment count JavaScript.
-        $node_links['disqus']['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
+        // Attach disqus library to load the Disqus comment count JavaScript.
+        $node_links['#attached']['library'][] = 'disqus/disqus';
         $node_links['disqus']['#attached']['js'][] = array(
           'data' => array('disqusComments' => \Drupal::config('disqus.settings')->get('disqus_domain')),
           'type' => 'setting',
