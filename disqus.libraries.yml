@@ -2,6 +2,7 @@ disqus:
   version: 1.x
   js:
     js/disqus.js: {}
+    js/disqus.settings.js: {}
   dependencies:
     - core/jquery
     - core/jquery.once

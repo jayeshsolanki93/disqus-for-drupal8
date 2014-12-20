@@ -79,13 +79,8 @@ class Disqus extends RenderElement {
       $disqus['callbacks'] = $element['#disqus']['callbacks'];
     }
     // Add the disqus.js and all the settings to process the JavaScript and load Disqus.
-    $element['#attached']['js'][] = drupal_get_path('module', 'disqus') . '/disqus.js';
-    $element['#attached']['js'][] = array(
-      'type' => 'setting',
-      'data' => array(
-        'disqus' => $disqus,
-      ),
-    );
+    $element['#attached']['library'][] = 'disqus/disqus';
+    $element['#attached']['drupalSettings']['disqus'] = $disqus;
     return $element;
   }
 

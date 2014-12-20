@@ -109,21 +109,14 @@ class DisqusCommentCount extends FieldPluginBase {
       );
 
       /**
-       * This attaches disqus.js, which will look for the DOM variable
-       * disqusComments which is set below. When found, the disqus javascript
-       * api replaces the html element with the attribute:
-       * "data-disqus-identifier" and replaces the element with the number of
-       * comments on the node.
+       * This attaches disqus.js specified in the disqus.libraries.yml file,
+       * which will look for the DOM variable disqusComments which is set below.
+       * When found, the disqus javascript api replaces the html element with
+       * the attribute: "data-disqus-identifier" and replaces the element with
+       * the number of comments on the entity.
        */
-      $content['#attached'] = array(
-        'js' => array(
-          array('data' => drupal_get_path('module', 'disqus') . '/disqus.js'),
-          array(
-            'data' => array('disqusComments' => $this->config->get('disqus_domain')),
-            'type' => 'setting',
-          ),
-        ),
-      );
+      $content['#attached']['library'][] = 'disqus/disqus';
+      $content['#attached']['drupalSettings']['disqusComments'] = $this->config->get('disqus_domain');
       return $content;
     }
   }

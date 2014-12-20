@@ -102,10 +102,7 @@ function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface 
 
         // Attach disqus library to load the Disqus comment count JavaScript.
         $node_links['#attached']['library'][] = 'disqus/disqus';
-        $node_links['disqus']['#attached']['js'][] = array(
-          'data' => array('disqusComments' => \Drupal::config('disqus.settings')->get('disqus_domain')),
-          'type' => 'setting',
-        );
+        $node_links['disqus']['#attached']['drupalSettings']['disqusComments'] = \Drupal::config('disqus.settings')->get('disqus_domain');
       }
     }
   }

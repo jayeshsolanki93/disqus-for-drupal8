@@ -76,8 +76,8 @@ class DisqusSettingsForm extends ConfigFormBase {
     $form['settings'] = array(
       '#type' => 'vertical_tabs',
       '#attached' => array(
-        'js' => array(
-          drupal_get_path('module', 'disqus') . '/disqus.settings.js'
+        'library' => array(
+          'disqus/disqus.settings'
         ),
       ),
       '#weight' => 50,
