@@ -95,7 +95,7 @@ class DisqusCommentManager implements DisqusCommentManagerInterface {
       // The login window must be closed once the user logs in.
       'url' => Url::fromRoute('user.login', array(), array('query' => array('destination' => 'disqus/closewindow'), 'absolute' => TRUE))->toString(),
       // The logout link must redirect back to the original page.
-      'logout' => Url::fromRoute('user.logout', array(), array('query' => array('destination' => current_path()), 'absolute' => TRUE))->toString(),
+      'logout' => Url::fromRoute('user.logout', array(), array('query' => array('destination' => Url::fromRoute('<current>')), 'absolute' => TRUE))->toString(),
       'width' => 800,
       'height' => 600,
     );
