@@ -43,30 +43,6 @@ function disqus_help($route_name, RouteMatchInterface $route_match) {
 }
 
 /**
- * Implements hook_permission().
- */
-function disqus_permission() {
-  return array(
-    'administer disqus' => array(
-      'title' => t('Administer Disqus'),
-      'description' => t('Perform administrative actions with Disqus.'),
-    ),
-    'view disqus comments' => array(
-      'title' => t('View Disqus comments'),
-      'description' => t('Allows access to view Disqus comments.')
-    ),
-    'display disqus comments on profile' => array(
-      'title' => t('Disqus comments in profile'),
-      'description' => t('When enabled, will display Disqus comments on the profiles of users belonging to this role.'),
-    ),
-    'toggle disqus comments' => array(
-      'title' => t('Toggle Disqus comments'),
-      'description' => t('When enabled, will allow users to toggle comments on and off on nodes.'),
-    ),
-  );
-}
-
-/**
  * Implements hook_node_links_alter().
  */
 function disqus_node_links_alter(array &$node_links, \Drupal\node\NodeInterface $node, array &$context) {
