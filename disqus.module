@@ -180,7 +180,7 @@ function disqus_entity_update(Drupal\Core\Entity\EntityInterface $entity) {
  * Implements hook_field_views_data().
  */
 function disqus_field_views_data(\Drupal\field\FieldStorageConfigInterface $field_storage) {
-  $data = field_views_field_default_views_data($field_storage);
+  $data = views_field_default_views_data ($field_storage);
   foreach ($data as $table_name => $table_data) {
     $data[$table_name]['entity_id']['field'] = array(
       'title' => t('Disqus Comment Count'),
