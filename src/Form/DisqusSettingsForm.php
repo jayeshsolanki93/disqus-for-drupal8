@@ -65,6 +65,13 @@ class DisqusSettingsForm extends ConfigFormBase {
   /**
    * {@inheritdoc}
    */
+  protected function getEditableConfigNames() {
+    return ['disqus.settings'];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function buildForm(array $form, FormStateInterface $form_state) {
     $disqus_config = $this->config('disqus.settings');
     $form['disqus_domain'] = array(
